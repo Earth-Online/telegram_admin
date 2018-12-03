@@ -3,8 +3,21 @@
 """
 module docs
 """
-from command import start
+from command import start, run
+from telegram.ext import ConversationHandler
+
+from constant import RUN
 
 command_handler = [
     start,
 ]
+
+messgae_handler = ConversationHandler(
+    entry_points=[run],
+    states={
+        RUN: [
+            
+        ],
+    }
+)
+
