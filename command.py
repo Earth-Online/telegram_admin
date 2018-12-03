@@ -5,7 +5,9 @@ bot command
 """
 from telegram import Update, Bot, MessageEntity
 from telegram.ext import Dispatcher
-from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG
+from telegram.chatmember import ChatMember
+from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
+    GET_ADMINS_MSG
 from tool import command_wrap, check_admin
 from admin import update_admin_list
 from module import DBSession
@@ -93,3 +95,23 @@ def get_id(bot, update):
                                         group_id=update.message.chat_id
                                         )
                      )
+
+
+@command_wrap()
+def admins(bot, update):
+    """
+
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :return:
+    """
+    admin_list = bot.get_chat_administrators(chat_id=update.message.chat_id)
+    createors = ""
+    adminors = ""
+    for admin in admin_list:
+        if admin['status'] == ChatMember.CREATOR:
+            createors = createors + ADMIN_FORMAT.format(user_name=admin.user.full_name, user_id=admin.user.id)
+        if admin['status'] == ChatMember.ADMINISTRATOR:
+            adminors = adminors + ADMIN_FORMAT.format(user_name=admin.user.full_name, user_id=admin.user.id)
+    bot.send_message(chat_id=update.message.chat_id, text=GET_ADMINS_MSG.format(createors=createors, admins=adminors))

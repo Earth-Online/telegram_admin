@@ -21,6 +21,15 @@ ID_MSG = """
 🔹 group id : {group_id}
 """
 
+GET_ADMINS_MSG = """
+👮‍♂ Groups Creator :
+{creators}
+💂‍♂ Group Admins :
+{admins}
+"""
+
+ADMIN_FORMAT = """- [{username}](tg://user?id={user_id})"""
+
 RUN = 1
 STOP = 0
 
