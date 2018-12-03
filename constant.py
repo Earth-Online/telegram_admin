@@ -29,6 +29,7 @@ GET_ADMINS_MSG = """
 """
 
 ADMIN_FORMAT = """- [{username}](tg://user?id={user_id})"""
+GROUP_FORMAT = "{group_title} |{group_id}| [GroupLink]({group_link})"
 
 RUN = 1
 STOP = 0

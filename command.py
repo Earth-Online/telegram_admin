@@ -7,11 +7,12 @@ from telegram import Update, Bot, MessageEntity
 from telegram.ext import Dispatcher
 from telegram.chatmember import ChatMember
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
-    GET_ADMINS_MSG
+    GET_ADMINS_MSG, GROUP_FORMAT
 from tool import command_wrap, check_admin
 from admin import update_admin_list
 from module import DBSession
 from module.user import User
+from module.group import Group
 
 
 @command_wrap()
@@ -61,6 +62,11 @@ def run(bot, update):
     if info['status'] == ADMIN:
         bot.send_message(chat_id=update.message.chat_id, text=BOT_NO_ADMIN_MSG)
         return
+    session = DBSession()
+    group = Group(id=update.message.chat_id, title=update.message.chat.title, link=update.message.chat.invite_link)
+    session.merge(group)
+    session.commit()
+    session.close()
     bot.send_message(chat_id=update.message.chat_id, text=BOT_IS_ADMIN_MSG)
     return RUN
 
@@ -111,7 +117,25 @@ def admins(bot, update):
     adminors = ""
     for admin in admin_list:
         if admin['status'] == ChatMember.CREATOR:
-            createors = createors + ADMIN_FORMAT.format(user_name=admin.user.full_name, user_id=admin.user.id)
+            createors = createors + ADMIN_FORMAT.format(username=admin.user.full_name, user_id=admin.user.id)
         if admin['status'] == ChatMember.ADMINISTRATOR:
-            adminors = adminors + ADMIN_FORMAT.format(user_name=admin.user.full_name, user_id=admin.user.id)
-    bot.send_message(chat_id=update.message.chat_id, text=GET_ADMINS_MSG.format(createors=createors, admins=adminors))
+            adminors = adminors + ADMIN_FORMAT.format(username=admin.user.full_name, user_id=admin.user.id)
+    bot.send_message(chat_id=update.message.chat_id, text=GET_ADMINS_MSG.format(creators=createors, admins=adminors))
+
+
+@command_wrap()
+@check_admin()
+def get_groups(bot, update):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    session = DBSession()
+    groups = session.query(Group).all()
+    ret_text = ""
+    for group in groups:
+        info = bot.get_chat(chat_id=group.id)
+        ret_text = ret_text + GROUP_FORMAT.format(group_title=info.title, group_id=info.id, group_link=info.invite_link)
