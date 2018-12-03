@@ -18,7 +18,7 @@ ADMIN = "administrator"
 
 ID_MSG = """
 🔸 your id : {user_id}
-🔹 group id : {group+id}
+🔹 group id : {group_id}
 """
 
 RUN = 1

@@ -7,7 +7,7 @@ import logging
 import os
 
 
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 
 # bot token
 TOKEN = os.environ.get('token') or ''
@@ -16,4 +16,4 @@ TOKEN = os.environ.get('token') or ''
 DB_URL = 'sqlite:///data/test.db'
 
 # firse admin
-ADMIN = []
+ADMIN = [529436356]

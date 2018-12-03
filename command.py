@@ -20,7 +20,7 @@ def start(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=START_MSG)
 
 
-@command_wrap(name="add")
+@command_wrap(name="add", pass_args=True)
 @check_admin()
 def add_admin(bot, update, args):
     """
@@ -41,7 +41,7 @@ def add_admin(bot, update, args):
     session.commit()
     session.close()
     update_admin_list()
-    bot.send_message(id=update.message.chat_id, text=ADD_ADMIN_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=ADD_ADMIN_OK_MSG)
 
 
 @command_wrap()
