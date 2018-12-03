@@ -3,6 +3,7 @@
 """
 module docs
 """
+import logging
 from telegram import Update, Bot
 from functools import wraps
 from telegram.ext import CommandHandler, MessageHandler
@@ -44,6 +45,7 @@ def check_admin(admin=True):
             user = update.message.from_user
             if user_is_admin(user.id) != admin:
                 # TODO add some error msg
+                bot.send_message(chat_id=update.message.chat_id, text="you not admin")
                 return
             return func(bot, update, *args, **kwargs)
 

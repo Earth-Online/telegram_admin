@@ -5,7 +5,7 @@ bot command
 """
 from telegram import Update, Bot, MessageEntity
 from telegram.ext import Dispatcher
-from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG
+from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG
 from tool import command_wrap, check_admin
 from admin import update_admin_list
 from module import DBSession
@@ -78,3 +78,18 @@ def clearwarns(bot, update, args):
     user_data = dispatcher.user_data
     for user in user_list:
         user_data[user]['warn'] = 0
+
+
+@command_wrap(name='id')
+def get_id(bot, update):
+    """
+
+    :param bot:
+    :param update:
+    :return:
+    """
+    bot.send_message(chat_id=update.message.chat_id,
+                     text=ID_MSG.format(user_id=update.message.from_user['id'],
+                                        group_id=update.message.chat_id
+                                        )
+                     )

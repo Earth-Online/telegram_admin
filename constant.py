@@ -16,6 +16,11 @@ WARN_MSG = "not send"
 
 ADMIN = "administrator"
 
+ID_MSG = """
+🔸 your id : {user_id}
+🔹 group id : {group+id}
+"""
+
 RUN = 1
 STOP = 0
 

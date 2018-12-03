@@ -18,8 +18,9 @@ messgae_handler = ConversationHandler(
     entry_points=[run],
     states={
         RUN: [
-            command_handler
+            common_message_handler
         ],
-    }
+    },
+    fallbacks=[clearwarns]
 )
 

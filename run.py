@@ -21,6 +21,7 @@ def main():
     updater = Updater(token=TOKEN)
     dispatcher = updater.dispatcher
     for command in command_handler:
+        logging.debug(f"add {command.command} command")
         dispatcher.add_handler(command)
     logging.debug('update admin list ing')
     update_admin_list()
