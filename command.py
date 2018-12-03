@@ -3,7 +3,8 @@
 """
 bot command
 """
-from telegram import Update, Bot
+from telegram import Update, Bot, MessageEntity
+from telegram.ext import Dispatcher
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG
 from tool import command_wrap, check_admin
 from admin import update_admin_list
@@ -20,7 +21,7 @@ def start(bot, update):
 
 
 @command_wrap(name="add")
-@check_admin
+@check_admin()
 def add_admin(bot, update, args):
     """
     add admin
@@ -44,7 +45,7 @@ def add_admin(bot, update, args):
 
 
 @command_wrap()
-@check_admin
+@check_admin()
 def run(bot, update):
     """
     :param bot:
@@ -60,3 +61,20 @@ def run(bot, update):
         return
     bot.send_message(chat_id=update.message.chat_id, text=BOT_IS_ADMIN_MSG)
     return RUN
+
+
+@command_wrap(pass_args=True)
+@check_admin()
+def clearwarns(bot, update, args):
+    user_list = [args]
+    if update.message.reply_to_message:
+        user_list.append(update.reply_to_message.from_user['id'])
+    if update.message.entities:
+        for entity in update.message.entities:
+            if entity.type == MessageEntity.MENTION:
+                user_list.append(entity.user['id'])
+
+    dispatcher = Dispatcher.get_instance()
+    user_data = dispatcher.user_data
+    for user in user_list:
+        user_data.get(user)['warn'] = 0
