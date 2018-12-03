@@ -7,6 +7,7 @@ import logging
 from telegram.ext import Updater
 from config import LOG_LEVEL, TOKEN
 from handler import command_handler
+from admin import update_admin_list
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -21,7 +22,11 @@ def main():
     dispatcher = updater.dispatcher
     for command in command_handler:
         dispatcher.add_handler(command)
+    logging.debug('update admin list ing')
+    update_admin_list()
+    logging.info('run bot')
     updater.start_polling()
+    updater.idle()
 
 
 if __name__ == "__main__":

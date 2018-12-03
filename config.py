@@ -16,6 +16,4 @@ TOKEN = os.environ.get('token') or ''
 DB_URL = 'sqlite:///data/test.db'
 
 # firse admin
-ADMIN = ''
-
-
+ADMIN = []

@@ -77,4 +77,4 @@ def clearwarns(bot, update, args):
     dispatcher = Dispatcher.get_instance()
     user_data = dispatcher.user_data
     for user in user_list:
-        user_data.get(user)['warn'] = 0
+        user_data[user]['warn'] = 0
