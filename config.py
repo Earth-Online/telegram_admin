@@ -10,3 +10,5 @@ import os
 LOG_LEVEL = logging.INFO
 
 TOKEN = os.environ.get('token') or ''
+
+DB_URL = 'sqlite:///data/test.db'
