@@ -8,7 +8,6 @@ from constant import WARN_MSG
 from telegram import Update, Bot
 from tool import messaage_warp, check_admin
 from telegram.ext.filters import Filters
-from telegram import MessageEntity
 
 
 @messaage_warp(filters=(filter.TELEGRAM_DOMAIN() | filter.Lang() | filter.Flood()), pass_chat_data=True,

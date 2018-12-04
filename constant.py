@@ -44,6 +44,8 @@ GROUP_FORMAT = "{group_title} |{group_id}| [GroupLink]({group_link})"
 RUN = 1
 STOP = 0
 
+MAXWARNS_ERROR = "command error.command usage: /maxwarns <num>"
+
 
 class BanMessageType:
     VIDEO = 'video'

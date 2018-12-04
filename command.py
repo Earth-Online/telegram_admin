@@ -9,7 +9,8 @@ from telegram.ext import Dispatcher
 from telegram.chatmember import ChatMember
 from telegram import ParseMode
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
-    GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG
+    GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
+    BanMessageType
 from tool import command_wrap, check_admin
 from admin import update_admin_list
 from module import DBSession
@@ -246,6 +247,57 @@ def globalban_list(bot, update):
     for data in datas:
         ret_text = GLOBAL_BAN_FORMAT.format(user_name=data.username, user_id=data.id)
     bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
+
+
+@command_wrap(pass_chat_data=True, pass_args=True)
+@check_admin()
+def maxwarns(bot, update, args, chat_data):
+    """
+    :param args:
+    :param chat_data:
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    if len(args) == 0 or args[0].isdigit():
+        bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
+    chat_data['maxwarn'] = int(args[0])
+
+
+@command_wrap(pass_chat_data=True, pass_args=True)
+@check_admin()
+def settimeflood(bot, update, args, chat_data):
+    """
+    :param args:
+    :param chat_data:
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    if len(args) == 0 or args[0].isdigit():
+        bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
+    chat_data[BanMessageType.FLOOD]['time'] = int(args[0])
+
+
+@command_wrap(pass_chat_data=True, pass_args=True)
+@check_admin()
+def setflood(bot, update, args, chat_data):
+    """
+    :param args:
+    :param chat_data:
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    if len(args) == 0 or args[0].isdigit():
+        bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
+    chat_data[BanMessageType.FLOOD]['num'] = int(args[0])
 
 
 def ban_user(user_list, ban=True):
