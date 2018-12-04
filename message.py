@@ -3,6 +3,7 @@
 """
 handle massage
 """
+import filter
 from constant import WARN_MSG
 from telegram import Update, Bot
 from tool import messaage_warp, check_admin
@@ -10,16 +11,19 @@ from telegram.ext.filters import Filters
 from telegram import MessageEntity
 
 
-@messaage_warp(filters=Filters.photo)
-def gif_handler(bot, update):
+@messaage_warp(filters=filter.TELEGRAM_DOMAIN(), pass_chat_data=True, pass_user_data=True)
+def telegram_link_handler(bot, update, user_data, chat_data):
     """
+    :param chat_data:
+    :param user_data:
     :param bot:
     :type bot: Bot
     :param update:
     :type update: Update
     :return:
     """
-    pass
+    update.message.delete()
+    warn_user(bot, update, user_data, chat_data)
 
 
 @messaage_warp(filters=Filters.all,

@@ -60,3 +60,7 @@ class MessageType:
     LOCATION = 'location'
     VENUE = 'venue'
     INVOICE = 'Invoice'
+    TG_LINK = 'telegramlinks'
+
+
+TELEGRAM_DOMAIN = ["t.me", "telegram.me"]

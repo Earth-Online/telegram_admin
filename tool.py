@@ -8,6 +8,7 @@ from telegram import Update, Bot
 from functools import wraps
 from telegram.ext import CommandHandler, MessageHandler
 from admin import user_is_admin
+from telegram.ext import Dispatcher
 
 
 def command_wrap(name: str = "", **kwargs):
@@ -28,7 +29,9 @@ def messaage_warp(**kwargs):
     def decorator(func):
         def wrapper(*args, **kwargs):
             func(*args, **kwargs)
+
         return MessageHandler(callback=wrapper, **kwargs)
+
     return decorator
 
 
@@ -50,4 +53,12 @@ def check_admin(admin=True):
             return func(bot, update, *args, **kwargs)
 
         return wrapper
+
     return decorator
+
+
+def check_ban_state(chat_id, key):
+    dispatcher = Dispatcher.get_instance()
+    chat_data = dispatcher.chat_data[chat_id]
+    ban_state = chat_data.get('ban_state', default=dict())
+    return bool(ban_state.get(key, False))
