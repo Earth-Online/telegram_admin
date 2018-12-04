@@ -3,10 +3,13 @@
 """
 send msg constar
 """
+import re
 
 START_MSG = "bot run ok"
 
 ADD_ADMIN_OK_MSG = "add ok"
+
+SET_OK_MSG = "setting ok"
 
 BOT_NO_ADMIN_MSG = "I SHOULD BE ADMIN IN THE GROUP"
 
@@ -65,6 +68,22 @@ class BanMessageType:
     TG_LINK = 'telegramlinks'
     LANG = 'language'
     FLOOD = "antiflood"
+    GIF = "gif"
+    BOLD = "bold"
+    ITALIC = "italic"
+    CODE = "code"
+    LINKTEXT = "linktext"
+    MARKDOWN = "markdown"
+    EMOJI = "emoji"
+    HASHTAG = "hashtag"
+    MENTION = "mention"
+    INLINE = "inline"
+    WARN = "warn"
+    BANWORD = "banword"
 
 
 TELEGRAM_DOMAIN = ["t.me", "telegram.me"]
+allow_setting = [BanMessageType.__dict__[key] for key in filter(lambda x: x[0] != "_", BanMessageType.__dict__)]
+
+allow_str = "|".join(allow_setting)
+SETTING_RE = re.compile(f"^({allow_str})\s+(on|off)$")

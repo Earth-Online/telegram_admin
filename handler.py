@@ -6,9 +6,9 @@ module docs
 from command import (start, run, add_admin, clearwarns, get_id, admins, get_groups, link, stop, info,
                      globalban, unglobalban, globalban_list,
                      )
-from telegram.ext import ConversationHandler
+from telegram.ext import ConversationHandler, RegexHandler
 from message import common_message_handler, telegram_link_handler
-from constant import RUN, STOP
+from constant import RUN, STOP, SETTING_RE
 
 command_handler = [
     start,
@@ -38,3 +38,4 @@ messgae_handler = ConversationHandler(
     fallbacks=[stop]
 )
 
+set_handler = RegexHandler(pattern=SETTING_RE, pass_chat_data=True, pass_groups=True)
