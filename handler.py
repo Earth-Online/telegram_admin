@@ -3,26 +3,32 @@
 """
 module docs
 """
-from command import start, run, add_admin, clearwarns, get_id, admins
+from command import start, run, add_admin, clearwarns, get_id, admins, get_groups, link, stop
 from telegram.ext import ConversationHandler
 from message import common_message_handler
-from constant import RUN
+from constant import RUN, STOP
 
 command_handler = [
     start,
     add_admin,
     clearwarns,
     get_id,
-    admins
+    admins,
+    get_groups
 ]
 
 messgae_handler = ConversationHandler(
     entry_points=[run],
     states={
         RUN: [
-            common_message_handler
+            link,
+            common_message_handler,
         ],
+        STOP: [
+
+        ]
+
     },
-    fallbacks=[clearwarns]
+    fallbacks=[stop]
 )
 

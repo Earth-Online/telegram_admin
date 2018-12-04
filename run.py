@@ -6,7 +6,7 @@ run bot
 import logging
 from telegram.ext import Updater
 from config import LOG_LEVEL, TOKEN
-from handler import command_handler
+from handler import command_handler, messgae_handler
 from admin import update_admin_list
 
 logging.basicConfig(

@@ -6,8 +6,9 @@ bot command
 from telegram import Update, Bot, MessageEntity
 from telegram.ext import Dispatcher
 from telegram.chatmember import ChatMember
+from telegram import ParseMode
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
-    GET_ADMINS_MSG, GROUP_FORMAT
+    GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP
 from tool import command_wrap, check_admin
 from admin import update_admin_list
 from module import DBSession
@@ -57,9 +58,9 @@ def run(bot, update):
     :type update: Update
     :return:
     """
-    bot_id = bot.get_me()['id']
+    bot_id = bot.id
     info = bot.get_chat_member(update.message.chat_id, bot_id)
-    if info['status'] == ADMIN:
+    if info['status'] != ChatMember.ADMINISTRATOR:
         bot.send_message(chat_id=update.message.chat_id, text=BOT_NO_ADMIN_MSG)
         return
     session = DBSession()
@@ -120,7 +121,8 @@ def admins(bot, update):
             createors = createors + ADMIN_FORMAT.format(username=admin.user.full_name, user_id=admin.user.id)
         if admin['status'] == ChatMember.ADMINISTRATOR:
             adminors = adminors + ADMIN_FORMAT.format(username=admin.user.full_name, user_id=admin.user.id)
-    bot.send_message(chat_id=update.message.chat_id, text=GET_ADMINS_MSG.format(creators=createors, admins=adminors))
+    bot.send_message(chat_id=update.message.chat_id, text=GET_ADMINS_MSG.format(creators=createors, admins=adminors),
+                     parse_mode=ParseMode.MARKDOWN)
 
 
 @command_wrap()
@@ -139,3 +141,33 @@ def get_groups(bot, update):
     for group in groups:
         info = bot.get_chat(chat_id=group.id)
         ret_text = ret_text + GROUP_FORMAT.format(group_title=info.title, group_id=info.id, group_link=info.invite_link)
+    bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
+
+
+@command_wrap()
+@check_admin
+def stop(bot, update):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    bot.send_message(chat_id=update.message.chat_id, text=BOT_STOP_MSG)
+    return STOP
+
+
+@command_wrap()
+@check_admin
+def link(bot, update):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    group_link = bot.export_chat_invite_link(update.message.chat_id)
+    bot.send_message(chat_id=update.message.chat_id, text=group_link)
+    return RUN

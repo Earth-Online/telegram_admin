@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from config import DB_URL
 from .user import Base
+from .group import Group
 
 Engine = create_engine(DB_URL)
 DBSession = sessionmaker(bind=Engine)

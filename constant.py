@@ -12,10 +12,11 @@ BOT_NO_ADMIN_MSG = "I SHOULD BE ADMIN IN THE GROUP"
 
 BOT_IS_ADMIN_MSG = "✅ Done Active The Group"
 
+BOT_STOP_MSG = "bot stop"
+
 WARN_MSG = "not send"
 
 ADMIN = "administrator"
-
 ID_MSG = """
 🔸 your id : {user_id}
 🔹 group id : {group_id}
