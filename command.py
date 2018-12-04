@@ -4,11 +4,12 @@
 bot command
 """
 from telegram import Update, Bot, MessageEntity
+from telegram import User as tg_user
 from telegram.ext import Dispatcher
 from telegram.chatmember import ChatMember
 from telegram import ParseMode
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
-    GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG
+    GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG
 from tool import command_wrap, check_admin
 from admin import update_admin_list
 from module import DBSession
@@ -185,3 +186,71 @@ def info(bot, update):
     send_user = update.message.from_user
     bot.send_message(chat_id=update.message.chat_id,
                      text=INFO_MSG.format(username=send_user.username, user_id=send_user.id))
+
+
+@command_wrap(pass_args=True)
+@check_admin()
+def globalban(bot, update, args):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    ban_user_list = []
+    if len(args):
+        bot.send_message(chat_id=update.message.chat_id, text=NO_GET_USENAME_MSG)
+    for _ in args:
+        ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
+    ban_user_list = list(args)
+    for entity in update.message.parse_entities(MessageEntity.MENTION).keys():
+        ban_user_list.append(entity.user)
+    ban_user(user_list=ban_user_list, ban=True)
+
+
+@command_wrap(pass_args=True)
+@check_admin()
+def unglobalban(bot, update, args):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    ban_user_list = []
+    if len(args):
+        bot.send_message(chat_id=update.message.chat_id, text=NO_GET_USENAME_MSG)
+    for _ in args:
+        ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
+    ban_user_list = list(args)
+    for entity in update.message.parse_entities(MessageEntity.MENTION).keys():
+        ban_user_list.append(entity.user)
+    ban_user(user_list=ban_user_list, ban=False)
+
+
+@command_wrap()
+@check_admin()
+def globalban_list(bot, update):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    session = DBSession()
+    datas = session.query(User).filter_by(isban=True).all()
+    ret_text = ""
+    for data in datas:
+        ret_text = GLOBAL_BAN_FORMAT.format(user_name=data.username, user_id=data.id)
+    bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
+
+
+def ban_user(user_list, ban=True):
+    session = DBSession()
+    for user_data in user_list:
+        session.merge(User(id=user_data.id, isban=ban, username=user_data.username))
+    session.commit()
+    session.close()

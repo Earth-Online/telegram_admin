@@ -34,6 +34,10 @@ GET_ADMINS_MSG = """
 {admins}
 """
 
+NO_GET_USENAME_MSG = """Warning: Due to api restrictions, usernames cannot be obtained from user_id.The user name of 
+this user will not be included in the added data. """
+
+GLOBAL_BAN_FORMAT = """[{user_name}](tg://user?id={user_id})"""
 ADMIN_FORMAT = """- [{username}](tg://user?id={user_id})"""
 GROUP_FORMAT = "{group_title} |{group_id}| [GroupLink]({group_link})"
 
