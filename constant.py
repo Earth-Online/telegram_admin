@@ -45,7 +45,7 @@ RUN = 1
 STOP = 0
 
 
-class MessageType:
+class BanMessageType:
     VIDEO = 'video'
     PHOTO = 'photo'
     AUDIO = 'audio'
@@ -61,6 +61,7 @@ class MessageType:
     VENUE = 'venue'
     INVOICE = 'Invoice'
     TG_LINK = 'telegramlinks'
+    LANG = 'language'
 
 
 TELEGRAM_DOMAIN = ["t.me", "telegram.me"]
