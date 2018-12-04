@@ -31,7 +31,7 @@ class TelegramLink(BaseFilter):
 class Lang(BaseFilter):
     def filter(self, message):
         chat_data: dict = get_chat_data(chat_id=message.chat_id)
-        ban_list = chat_data.get(BanMessageType.LANG, default=False)
+        ban_list = chat_data.get(BanMessageType.LANG, False)
         if not ban_list:
             return False
         return detect(message.text) in ban_list
@@ -43,7 +43,7 @@ class Flood(BaseFilter):
         if not check_ban_state(message.chat_id, BanMessageType.FLOOD):
             return False
         chat_data: dict = get_chat_data(chat_id=message.chat_id)
-        flood_limit = chat_data.get(BanMessageType.FLOOD, default={})
+        flood_limit = chat_data.get(BanMessageType.FLOOD, {})
         time = flood_limit.get("time")
         num = flood_limit.get("num")
         if not time or not num:
@@ -51,7 +51,7 @@ class Flood(BaseFilter):
         now_time = datetime.now().timestamp()
 
         user_data = get_user_data(message.from_user.id)
-        msg_data = user_data.get("msg_data", default=[])
+        msg_data = user_data.get("msg_data", [])
         if len(msg_data) < num:
             msg_data.append(now_time)
             user_data["msg_data"] = msg_data

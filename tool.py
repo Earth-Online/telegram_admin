@@ -61,7 +61,7 @@ def check_admin(admin=True):
 def check_ban_state(chat_id, key):
     dispatcher = Dispatcher.get_instance()
     chat_data = dispatcher.chat_data[chat_id]
-    ban_state = chat_data.get('ban_state', default=dict())
+    ban_state = chat_data.get('ban_state', dict())
     return bool(ban_state.get(key, False))
 
 

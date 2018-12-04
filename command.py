@@ -10,7 +10,7 @@ from telegram.chatmember import ChatMember
 from telegram import ParseMode
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
-    BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG
+    BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG
 from tool import command_wrap, check_admin
 from admin import update_admin_list
 from module import DBSession
@@ -61,8 +61,8 @@ def run(bot, update):
     :return:
     """
     bot_id = bot.id
-    info = bot.get_chat_member(update.message.chat_id, bot_id)
-    if info['status'] != ChatMember.ADMINISTRATOR:
+    group_info = bot.get_chat_member(update.message.chat_id, bot_id)
+    if group_info['status'] != ChatMember.ADMINISTRATOR:
         bot.send_message(chat_id=update.message.chat_id, text=BOT_NO_ADMIN_MSG)
         return
     session = DBSession()
@@ -77,7 +77,11 @@ def run(bot, update):
 @command_wrap(pass_args=True)
 @check_admin()
 def clearwarns(bot, update, args):
-    user_list = [args]
+    try:
+        user_list = [int(arg) for arg in args]
+    except ValueError:
+        bot.send_message(chat_id=update.message.chat_id, text="arg not user id")
+        return
     if update.message.reply_to_message:
         user_list.append(update.reply_to_message.from_user['id'])
     if update.message.entities:
@@ -89,6 +93,7 @@ def clearwarns(bot, update, args):
     user_data = dispatcher.user_data
     for user in user_list:
         user_data[user]['warn'] = 0
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
 @command_wrap(name='id')
@@ -141,8 +146,8 @@ def get_groups(bot, update):
     groups = session.query(Group).all()
     ret_text = ""
     for group in groups:
-        info = bot.get_chat(chat_id=group.id)
-        ret_text = ret_text + GROUP_FORMAT.format(group_title=info.title, group_id=info.id, group_link=info.invite_link)
+        ret_text = ret_text + GROUP_FORMAT.format(group_title=group.title, group_id=group.id,
+                                                  group_link=group.invite_link)
     bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
 
 
@@ -161,7 +166,7 @@ def stop(bot, update):
 
 
 @command_wrap()
-@check_admin
+@check_admin()
 def link(bot, update):
     """
     :param bot:
@@ -172,7 +177,6 @@ def link(bot, update):
     """
     group_link = bot.export_chat_invite_link(update.message.chat_id)
     bot.send_message(chat_id=update.message.chat_id, text=group_link)
-    return RUN
 
 
 @command_wrap()
@@ -204,10 +208,10 @@ def globalban(bot, update, args):
         bot.send_message(chat_id=update.message.chat_id, text=NO_GET_USENAME_MSG)
     for _ in args:
         ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
-    ban_user_list = list(args)
     for entity in update.message.parse_entities(MessageEntity.MENTION).keys():
         ban_user_list.append(entity.user)
     ban_user(user_list=ban_user_list, ban=True)
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
 @command_wrap(pass_args=True)
@@ -225,10 +229,10 @@ def unglobalban(bot, update, args):
         bot.send_message(chat_id=update.message.chat_id, text=NO_GET_USENAME_MSG)
     for _ in args:
         ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
-    ban_user_list = list(args)
     for entity in update.message.parse_entities(MessageEntity.MENTION).keys():
         ban_user_list.append(entity.user)
     ban_user(user_list=ban_user_list, ban=False)
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
 @command_wrap()
@@ -246,6 +250,8 @@ def globalban_list(bot, update):
     ret_text = ""
     for data in datas:
         ret_text = GLOBAL_BAN_FORMAT.format(user_name=data.username, user_id=data.id)
+    if ret_text == "":
+        bot.send_message(chat_id=update.message.chat_id, text="not have some globalban")
     bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
 
 
@@ -261,9 +267,10 @@ def maxwarns(bot, update, args, chat_data):
     :type update: Update
     :return:
     """
-    if len(args) == 0 or args[0].isdigit():
+    if len(args) == 0 or not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
     chat_data['maxwarn'] = int(args[0])
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
 @command_wrap(pass_chat_data=True, pass_args=True)
@@ -278,9 +285,10 @@ def settimeflood(bot, update, args, chat_data):
     :type update: Update
     :return:
     """
-    if len(args) == 0 or args[0].isdigit():
+    if len(args) == 0 or not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
     chat_data[BanMessageType.FLOOD]['time'] = int(args[0])
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
 @command_wrap(pass_chat_data=True, pass_args=True)
@@ -295,9 +303,10 @@ def setflood(bot, update, args, chat_data):
     :type update: Update
     :return:
     """
-    if len(args) == 0 or args[0].isdigit():
+    if len(args) == 0 or not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
     chat_data[BanMessageType.FLOOD]['num'] = int(args[0])
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
 @command_wrap(pass_chat_data=True)
@@ -334,7 +343,9 @@ def banword(bot, update, args, chat_data):
         bot.send_message(chat_id=update.message.chat_id, text=BANWORD_ERROR)
         return
     group_banwords = chat_data.get(BanMessageType.WORD, [])
-    chat_data[BanMessageType.WORD] = group_banwords.extend(args)
+    group_banwords.extend(args)
+    chat_data[BanMessageType.WORD] = group_banwords
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
 @command_wrap(pass_chat_data=True, pass_args=True)
@@ -360,6 +371,7 @@ def unbanword(bot, update, args, chat_data):
         except ValueError:
             continue
     chat_data[BanMessageType.WORD] = group_banwords
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
 @command_wrap(pass_chat_data=True)
@@ -380,7 +392,6 @@ def banwords(bot, update, chat_data):
         ret_text = ret_text + BANWORD_FORMAT.format(word=group_banword)
     ret_text = GET_BANWORDS_MSG.format(banwords=ret_text)
     bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
-
 
 
 def ban_user(user_list, ban=True):

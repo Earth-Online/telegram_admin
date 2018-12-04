@@ -10,7 +10,7 @@ from tool import messaage_warp, check_admin
 from telegram.ext.filters import Filters
 
 
-@messaage_warp(filters=(filter.TELEGRAM_DOMAIN() | filter.Lang() | filter.Flood() |
+@messaage_warp(filters=(filter.TelegramLink() | filter.Lang() | filter.Flood() |
                         filter.Lang() | filter.Emoji() | filter.Gif() | filter.Numbers()), pass_chat_data=True,
                pass_user_data=True)
 def telegram_link_handler(bot, update, user_data, chat_data):
@@ -42,7 +42,7 @@ def common_message_handler(bot, update, user_data, chat_data):
     :type user_data:dict
     :return:
     """
-    ban_state = chat_data.get('ban_state', default=dict())
+    ban_state = chat_data.get('ban_state', {})
     for ban_type in ban_state.keys():
         if getattr(update.message, ban_type, False):
             update.message.delete()
@@ -84,4 +84,4 @@ def warn_user(bot, update, user_data, chat_data):
     """
     if chat_data.get('warn'):
         bot.send_message(chat_id=update.message.chat_id, text=WARN_MSG)
-    user_data['warn'] = user_data.get('warn', default=0) + 1
+    user_data['warn'] = user_data.get('warn', 0) + 1

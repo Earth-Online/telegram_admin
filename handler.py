@@ -8,7 +8,7 @@ from command import (start, run, add_admin, clearwarns, get_id, admins, get_grou
                      banword, unbanword, banwords
                      )
 from telegram.ext import ConversationHandler, RegexHandler
-from message import common_message_handler, telegram_link_handler
+from message import common_message_handler, telegram_link_handler, limit_set
 from constant import RUN, STOP, SETTING_RE
 
 command_handler = [
@@ -47,4 +47,4 @@ messgae_handler = ConversationHandler(
     fallbacks=[stop]
 )
 
-set_handler = RegexHandler(pattern=SETTING_RE, pass_chat_data=True, pass_groups=True)
+set_handler = RegexHandler(callback=limit_set, pattern=SETTING_RE, pass_chat_data=True, pass_groups=True)
