@@ -68,7 +68,7 @@ def limit_set(bot, update, chat_data, groups):
         for limit in limits:
             chat_data['ban_state'][limit] = groups[1]
     else:
-        chat_data['ban_state'][groups[0]] = groups[1]
+        chat_data['ban_state'][groups[0]] = True if groups[1] == "off" else None
     bot.send_message(update.message.chat_id, text=SET_OK_MSG)
 
 

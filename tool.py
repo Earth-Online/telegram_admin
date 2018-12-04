@@ -11,7 +11,7 @@ from admin import user_is_admin
 from telegram.ext import Dispatcher
 
 
-def command_wrap(name: str = "", **kwargs):
+def command_wrap(name: str = "", pass_chat_data=False, pass_user_data=False, pass_args=False, **kwargs):
     """
     wrap command handle
     """
@@ -20,7 +20,8 @@ def command_wrap(name: str = "", **kwargs):
         def wrapper(*args, **kwargs):
             func(*args, **kwargs)
 
-        return CommandHandler(name or func.__name__, wrapper, **kwargs)
+        return CommandHandler(name or func.__name__, pass_chat_data=pass_chat_data, pass_user_data=pass_user_data,
+                              pass_args=pass_args, callback=wrapper, **kwargs)
 
     return decorator
 

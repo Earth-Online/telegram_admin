@@ -50,6 +50,7 @@ OK = "✅"
 NO = "❌"
 
 MAXWARNS_ERROR = "command error.command usage: /maxwarns <num>"
+BANWORD_ERROR = "command error.command usage: /banword <banword>"
 
 
 class BanMessageType:
@@ -84,7 +85,7 @@ class BanMessageType:
     WARN = "warn"
     BANWORD = "banword"
     URL = "url"
-
+    WORD = "banword"
 
 LIMIT_DICT = {
     BanMessageType.MARKDOWN: [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL],
