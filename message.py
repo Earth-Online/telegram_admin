@@ -4,13 +4,14 @@
 handle massage
 """
 import filter
-from constant import WARN_MSG, SET_OK_MSG
+from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT
 from telegram import Update, Bot
 from tool import messaage_warp, check_admin
 from telegram.ext.filters import Filters
 
 
-@messaage_warp(filters=(filter.TELEGRAM_DOMAIN() | filter.Lang() | filter.Flood()), pass_chat_data=True,
+@messaage_warp(filters=(filter.TELEGRAM_DOMAIN() | filter.Lang() | filter.Flood() |
+                        filter.Lang() | filter.Emoji() | filter.Gif() | filter.Numbers()), pass_chat_data=True,
                pass_user_data=True)
 def telegram_link_handler(bot, update, user_data, chat_data):
     """
@@ -62,7 +63,12 @@ def common_message_handler(bot, update, user_data, chat_data):
 
 @check_admin(admin=True)
 def limit_set(bot, update, chat_data, groups):
-    chat_data['ban_state'][groups[0]] = groups[1]
+    if LIMIT_DICT.get(groups[0]):
+        limits = LIMIT_DICT.get(groups[0])
+        for limit in limits:
+            chat_data['ban_state'][limit] = groups[1]
+    else:
+        chat_data['ban_state'][groups[0]] = groups[1]
     bot.send_message(update.message.chat_id, text=SET_OK_MSG)
 
 

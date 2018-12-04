@@ -10,8 +10,9 @@ from urllib.parse import urlparse
 from tool import check_ban_state, get_chat_data, get_user_data
 from langdetect import detect
 from datetime import datetime
+from emoji import emoji_count
 
-from constant import TELEGRAM_DOMAIN, BanMessageType
+from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE
 
 
 class TelegramLink(BaseFilter):
@@ -65,3 +66,30 @@ class Flood(BaseFilter):
             user_data["msg_data"] = msg_data
             return False
         return True
+
+
+class Gif(BaseFilter):
+    def filter(self, message):
+        if not check_ban_state(message.chat_id, BanMessageType.GIF):
+            return False
+        if not message.document:
+            return False
+        if message['document']['file_name'][-7:] == "gif.mp4":
+            return True
+        return False
+
+
+class Emoji(BaseFilter):
+    def filter(self, message):
+        if not check_ban_state(message.chat_id, BanMessageType.EMOJI):
+            return False
+        if emoji_count(message.text):
+            return True
+        return False
+
+
+class Numbers(BaseFilter):
+    def filter(self, message):
+        if not check_ban_state(message.chat_id, BanMessageType.NUMBERS):
+            return False
+        return NUM_RE.search(message.text)

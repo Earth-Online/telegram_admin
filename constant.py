@@ -68,6 +68,7 @@ class BanMessageType:
     TG_LINK = 'telegramlinks'
     LANG = 'language'
     FLOOD = "antiflood"
+    NUMBERS = "numbers"
     GIF = "gif"
     BOLD = "bold"
     ITALIC = "italic"
@@ -80,10 +81,31 @@ class BanMessageType:
     INLINE = "inline"
     WARN = "warn"
     BANWORD = "banword"
+    URL = "url"
+
+
+LIMIT_DICT = {
+    BanMessageType.MARKDOWN: [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL],
+    BanMessageType.FORWARD: ["forward_date"]
+}
+
+
+class GetLimit(dict):
+    limit_dict = {
+        BanMessageType.MARKDOWN: [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL]
+    }
+
+    def __getitem__(self, item):
+        return self.limit_dict.get(item)
+
+    def __missing__(self, key):
+        return getattr(BanMessageType, key)
 
 
 TELEGRAM_DOMAIN = ["t.me", "telegram.me"]
+MARKDOWN_BAN = [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL]
 allow_setting = [BanMessageType.__dict__[key] for key in filter(lambda x: x[0] != "_", BanMessageType.__dict__)]
 
 allow_str = "|".join(allow_setting)
 SETTING_RE = re.compile(f"^({allow_str})\s+(on|off)$")
+NUM_RE = re.compile(r"\d")
