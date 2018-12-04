@@ -11,7 +11,8 @@ from telegram.ext.filters import Filters
 from telegram import MessageEntity
 
 
-@messaage_warp(filters=(filter.TELEGRAM_DOMAIN() | filter.Lang()), pass_chat_data=True, pass_user_data=True)
+@messaage_warp(filters=(filter.TELEGRAM_DOMAIN() | filter.Lang() | filter.Flood()), pass_chat_data=True,
+               pass_user_data=True)
 def telegram_link_handler(bot, update, user_data, chat_data):
     """
     :param chat_data:

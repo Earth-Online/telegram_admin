@@ -64,6 +64,11 @@ def check_ban_state(chat_id, key):
     return bool(ban_state.get(key, False))
 
 
-def get_chat_data(chat_id=None):
+def get_chat_data(chat_id=None) -> dict:
     dispatcher = Dispatcher.get_instance()
     return dispatcher.chat_data[chat_id] if chat_id else dispatcher.chat_data
+
+
+def get_user_data(user_id=None) -> dict:
+    dispatcher = Dispatcher.get_instance()
+    return dispatcher.user_data[user_id] if user_id else dispatcher.user_data

@@ -62,6 +62,7 @@ class BanMessageType:
     INVOICE = 'Invoice'
     TG_LINK = 'telegramlinks'
     LANG = 'language'
+    FLOOD = "antiflood"
 
 
 TELEGRAM_DOMAIN = ["t.me", "telegram.me"]

@@ -7,8 +7,9 @@ docs
 from telegram.ext.filters import BaseFilter
 from telegram.messageentity import MessageEntity
 from urllib.parse import urlparse
-from tool import check_ban_state, get_chat_data
+from tool import check_ban_state, get_chat_data, get_user_data
 from langdetect import detect
+from datetime import datetime
 
 from constant import TELEGRAM_DOMAIN, BanMessageType
 
@@ -33,3 +34,34 @@ class Lang(BaseFilter):
         if not ban_list:
             return False
         return detect(message.text) in ban_list
+
+
+class Flood(BaseFilter):
+
+    def filter(self, message):
+        if not check_ban_state(message.chat_id, BanMessageType.FLOOD):
+            return False
+        chat_data: dict = get_chat_data(chat_id=message.chat_id)
+        flood_limit = chat_data.get(BanMessageType.FLOOD, default={})
+        time = flood_limit.get("time")
+        num = flood_limit.get("num")
+        if not time or not num:
+            return
+        now_time = datetime.now().timestamp()
+
+        user_data = get_user_data(message.from_user.id)
+        msg_data = user_data.get("msg_data", default=[])
+        if len(msg_data) < num:
+            msg_data.append(now_time)
+            user_data["msg_data"] = msg_data
+            return False
+        liimt_time = now_time - time
+        if msg_data[-1] < liimt_time:
+            msg_data = [now_time]
+            user_data["msg_data"] = msg_data
+            return False
+        msg_data = filter(lambda x: x > liimt_time, msg_data)
+        if len(list(msg_data)) < num:
+            user_data["msg_data"] = msg_data
+            return False
+        return True
