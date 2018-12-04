@@ -14,6 +14,11 @@ BOT_IS_ADMIN_MSG = "✅ Done Active The Group"
 
 BOT_STOP_MSG = "bot stop"
 
+INFO_MSG = """
+🔸 USER NAME : {username}
+🔸 USER ID : {user_id}
+"""
+
 WARN_MSG = "not send"
 
 ADMIN = "administrator"

@@ -8,7 +8,7 @@ from telegram.ext import Dispatcher
 from telegram.chatmember import ChatMember
 from telegram import ParseMode
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
-    GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP
+    GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG
 from tool import command_wrap, check_admin
 from admin import update_admin_list
 from module import DBSession
@@ -171,3 +171,17 @@ def link(bot, update):
     group_link = bot.export_chat_invite_link(update.message.chat_id)
     bot.send_message(chat_id=update.message.chat_id, text=group_link)
     return RUN
+
+
+@command_wrap()
+def info(bot, update):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    send_user = update.message.from_user
+    bot.send_message(chat_id=update.message.chat_id,
+                     text=INFO_MSG.format(username=send_user.username, user_id=send_user.id))

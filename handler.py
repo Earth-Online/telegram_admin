@@ -3,7 +3,7 @@
 """
 module docs
 """
-from command import start, run, add_admin, clearwarns, get_id, admins, get_groups, link, stop
+from command import start, run, add_admin, clearwarns, get_id, admins, get_groups, link, stop, info
 from telegram.ext import ConversationHandler
 from message import common_message_handler
 from constant import RUN, STOP
@@ -14,7 +14,8 @@ command_handler = [
     clearwarns,
     get_id,
     admins,
-    get_groups
+    get_groups,
+    info
 ]
 
 messgae_handler = ConversationHandler(
