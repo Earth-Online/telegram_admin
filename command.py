@@ -10,7 +10,7 @@ from telegram.chatmember import ChatMember
 from telegram import ParseMode
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
-    BanMessageType
+    BanMessageType, allow_setting, OK, NO
 from tool import command_wrap, check_admin
 from admin import update_admin_list
 from module import DBSession
@@ -298,6 +298,22 @@ def setflood(bot, update, args, chat_data):
     if len(args) == 0 or args[0].isdigit():
         bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
     chat_data[BanMessageType.FLOOD]['num'] = int(args[0])
+
+
+@command_wrap(pass_chat_data=True)
+@check_admin()
+def settings(bot, update, chat_data):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    ret_text = ""
+    for setting in allow_setting:
+        ret_text = ret_text + f"{setting} " + OK if chat_data.get(setting) else NO
+    bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
 
 
 def ban_user(user_list, ban=True):

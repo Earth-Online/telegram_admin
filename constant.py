@@ -46,6 +46,8 @@ GROUP_FORMAT = "{group_title} |{group_id}| [GroupLink]({group_link})"
 
 RUN = 1
 STOP = 0
+OK = "✅"
+NO = "❌"
 
 MAXWARNS_ERROR = "command error.command usage: /maxwarns <num>"
 
