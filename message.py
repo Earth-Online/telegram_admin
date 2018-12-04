@@ -4,7 +4,7 @@
 handle massage
 """
 import filter
-from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT
+from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType
 from telegram import Update, Bot
 from tool import messaage_warp, check_admin
 from telegram.ext.filters import Filters
@@ -63,6 +63,8 @@ def common_message_handler(bot, update, user_data, chat_data):
 
 @check_admin(admin=True)
 def limit_set(bot, update, chat_data, groups):
+    if not chat_data.get('ban_state'):
+        chat_data['ban_state'] = {}
     if LIMIT_DICT.get(groups[0]):
         limits = LIMIT_DICT.get(groups[0])
         for limit in limits:
@@ -82,6 +84,6 @@ def warn_user(bot, update, user_data, chat_data):
     :type user_data: dict
     :return:
     """
-    if chat_data.get('warn'):
+    if chat_data.get(BanMessageType.WARN):
         bot.send_message(chat_id=update.message.chat_id, text=WARN_MSG)
     user_data['warn'] = user_data.get('warn', 0) + 1

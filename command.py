@@ -5,7 +5,7 @@ bot command
 """
 from telegram import Update, Bot, MessageEntity
 from telegram import User as tg_user
-from telegram.ext import Dispatcher
+from telegram.ext import Dispatcher, ConversationHandler
 from telegram.chatmember import ChatMember
 from telegram import ParseMode
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
@@ -132,7 +132,7 @@ def admins(bot, update):
                      parse_mode=ParseMode.MARKDOWN)
 
 
-@command_wrap()
+@command_wrap(name="groups")
 @check_admin()
 def get_groups(bot, update):
     """
@@ -147,12 +147,12 @@ def get_groups(bot, update):
     ret_text = ""
     for group in groups:
         ret_text = ret_text + GROUP_FORMAT.format(group_title=group.title, group_id=group.id,
-                                                  group_link=group.invite_link)
+                                                  group_link=group.link)
     bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
 
 
 @command_wrap()
-@check_admin
+@check_admin()
 def stop(bot, update):
     """
     :param bot:
@@ -162,7 +162,7 @@ def stop(bot, update):
     :return:
     """
     bot.send_message(chat_id=update.message.chat_id, text=BOT_STOP_MSG)
-    return STOP
+    return ConversationHandler.END
 
 
 @command_wrap()
@@ -287,7 +287,9 @@ def settimeflood(bot, update, args, chat_data):
     """
     if len(args) == 0 or not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
-    chat_data[BanMessageType.FLOOD]['time'] = int(args[0])
+    data = chat_data.get(BanMessageType.FLOOD, {})
+    data['time'] = int(args[0])
+    chat_data[BanMessageType.FLOOD] = data
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
@@ -305,7 +307,9 @@ def setflood(bot, update, args, chat_data):
     """
     if len(args) == 0 or not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
-    chat_data[BanMessageType.FLOOD]['num'] = int(args[0])
+    data = chat_data.get(BanMessageType.FLOOD, {})
+    data['num'] = int(args[0])
+    chat_data[BanMessageType.FLOOD] = data
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
@@ -321,8 +325,9 @@ def settings(bot, update, chat_data):
     :return:
     """
     ret_text = ""
+    limit = chat_data.get("ban_state", {})
     for setting in allow_setting:
-        ret_text = ret_text + f"{setting} " + OK if chat_data.get(setting) else NO
+        ret_text = ret_text + f"{setting} \n" + (OK if limit.get(setting) else NO)
     bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
 
 

@@ -23,7 +23,7 @@ class TelegramLink(BaseFilter):
         if not len(urls):
             return False
         for url in urls.keys():
-            if urlparse(url).netloc in TELEGRAM_DOMAIN:
+            if urlparse(url.url).netloc in TELEGRAM_DOMAIN:
                 return True
         return False
 

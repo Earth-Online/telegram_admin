@@ -42,14 +42,14 @@ GET_BANWORDS_MSG = """
 {banwords}
 """
 
-BANWORD_FORMAT = """• {word}"""
+BANWORD_FORMAT = """• {word}\n"""
 
 NO_GET_USENAME_MSG = """Warning: Due to api restrictions, usernames cannot be obtained from user_id.The user name of 
 this user will not be included in the added data. """
 
-GLOBAL_BAN_FORMAT = """[{user_name}](tg://user?id={user_id})"""
-ADMIN_FORMAT = """- [{username}](tg://user?id={user_id})"""
-GROUP_FORMAT = "{group_title} |{group_id}| [GroupLink]({group_link})"
+GLOBAL_BAN_FORMAT = """[{user_name}](tg://user?id={user_id})\n"""
+ADMIN_FORMAT = """- [{username}](tg://user?id={user_id})\n"""
+GROUP_FORMAT = "{group_title} |{group_id}| [GroupLink]({group_link})\n"
 
 RUN = 1
 STOP = 0
@@ -83,6 +83,7 @@ class BanMessageType:
     BOLD = "bold"
     ITALIC = "italic"
     CODE = "code"
+    TEXT_LINK = 'text_link'
     LINKTEXT = "linktext"
     MARKDOWN = "markdown"
     EMOJI = "emoji"
@@ -93,6 +94,9 @@ class BanMessageType:
     BANWORD = "banword"
     URL = "url"
     WORD = "banword"
+    VIDEONOTE = "videonote"
+
+
 
 LIMIT_DICT = {
     BanMessageType.MARKDOWN: [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL],
