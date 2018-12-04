@@ -10,7 +10,7 @@ from telegram.chatmember import ChatMember
 from telegram import ParseMode
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
-    BanMessageType, allow_setting, OK, NO, BANWORD_ERROR
+    BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG
 from tool import command_wrap, check_admin
 from admin import update_admin_list
 from module import DBSession
@@ -333,8 +333,8 @@ def banword(bot, update, args, chat_data):
     if not len(args):
         bot.send_message(chat_id=update.message.chat_id, text=BANWORD_ERROR)
         return
-    banwords = chat_data.get(BanMessageType.WORD, [])
-    chat_data[BanMessageType.WORD] = banwords.extend(args)
+    group_banwords = chat_data.get(BanMessageType.WORD, [])
+    chat_data[BanMessageType.WORD] = group_banwords.extend(args)
 
 
 @command_wrap(pass_chat_data=True, pass_args=True)
@@ -353,13 +353,34 @@ def unbanword(bot, update, args, chat_data):
     if not len(args):
         bot.send_message(chat_id=update.message.chat_id, text=BANWORD_ERROR)
         return
-    banwords = chat_data.get(BanMessageType.WORD, [])
+    group_banwords = chat_data.get(BanMessageType.WORD, [])
     for arg in args:
         try:
-            banwords.remove(arg)
+            group_banwords.remove(arg)
         except ValueError:
             continue
-    chat_data[BanMessageType.WORD] = banwords
+    chat_data[BanMessageType.WORD] = group_banwords
+
+
+@command_wrap(pass_chat_data=True)
+@check_admin()
+def banwords(bot, update, chat_data):
+    """
+    :param chat_data:
+    :type chat_data: dict
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    group_banwords = chat_data.get(BanMessageType.WORD, [])
+    ret_text = ""
+    for group_banword in group_banwords:
+        ret_text = ret_text + BANWORD_FORMAT.format(word=group_banword)
+    ret_text = GET_BANWORDS_MSG.format(banwords=ret_text)
+    bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
+
 
 
 def ban_user(user_list, ban=True):

@@ -37,6 +37,13 @@ GET_ADMINS_MSG = """
 {admins}
 """
 
+GET_BANWORDS_MSG = """
+⛔️ ban words : 
+{banwords}
+"""
+
+BANWORD_FORMAT = """• {word}"""
+
 NO_GET_USENAME_MSG = """Warning: Due to api restrictions, usernames cannot be obtained from user_id.The user name of 
 this user will not be included in the added data. """
 
