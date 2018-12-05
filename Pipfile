@@ -6,9 +6,12 @@ name = "pypi"
 [packages]
 python-telegram-bot = "*"
 sqlalchemy = "*"
+langdetect = "*"
+emoji = "*"
 
 [dev-packages]
 pytest = "*"
+ipdb = "*"
 
 [requires]
 python_version = "3.7"
