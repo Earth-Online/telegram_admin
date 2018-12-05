@@ -7,8 +7,10 @@ import logging
 import pickle
 from logging import FileHandler, StreamHandler
 from telegram.ext import Updater, Dispatcher
-from config import LOG_LEVEL, TOKEN, LOG_FILE, CHAT_DATA_FILE, USER_DATA_FILE
-from handler import command_handler, messgae_handler, set_handler
+
+from command import save_data
+from config import LOG_LEVEL, TOKEN, LOG_FILE, CHAT_DATA_FILE, USER_DATA_FILE, DEFAULT_CHECK_TIME
+from handler import command_handler, messgae_handler, set_handler, stop_handler
 from admin import update_admin_list, update_ban_list
 
 f_handler = FileHandler(LOG_FILE)
@@ -42,13 +44,15 @@ def main():
     """
     run main function
     """
-    updater = Updater(token=TOKEN, request_kwargs={"read_timeout": 30})
+    updater = Updater(token=TOKEN, request_kwargs={"read_timeout": 30}, user_sig_handler=stop_handler)
     dispatcher = updater.dispatcher
+    job = updater.job_queue
     for command in command_handler:
         logging.debug(f"add {command.command} command")
         dispatcher.add_handler(command)
     dispatcher.add_handler(set_handler)
     dispatcher.add_handler(messgae_handler)
+    job.run_repeating(save_data, interval=DEFAULT_CHECK_TIME)
 
     update_admin_list()
     update_ban_list()
