@@ -249,7 +249,7 @@ def unglobalban(bot, update, args):
     ban_user_list = []
     for _ in args:
         if _.isdigit():
-            ban_user_list.append(tg_user(id=_, username="not get", is_bot=False))
+            ban_user_list.append(tg_user(id=_, first_name="not get", username="not get", is_bot=False))
     for entity in update.message.parse_entities(MessageEntity.TEXT_MENTION).keys():
         ban_user_list.append(entity.user)
     ban_user(user_list=ban_user_list, ban=False)

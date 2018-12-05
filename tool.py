@@ -23,7 +23,10 @@ def command_wrap(name: str = "", state=RUN, pass_chat_data=False, pass_user_data
     def decorator(func):
         def wrapper(*args, **kwargs):
             logging.debug(f"call {func.__name__} ")
-            ret = func(*args, **kwargs)
+            try:
+                ret = func(*args, **kwargs)
+            except Exception as e:
+                logging.error(e)
             if state:
                 return state
             return ret
