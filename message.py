@@ -63,6 +63,7 @@ def common_message_handler(bot, update, user_data, chat_data):
         update.message.delete()
         warn_user(bot, update, user_data, chat_data)
         return RUN
+    return RUN
 
 
 @check_admin(admin=True)
@@ -70,12 +71,21 @@ def common_message_handler(bot, update, user_data, chat_data):
 def limit_set(bot, update, chat_data, groups):
     if not chat_data.get('ban_state'):
         chat_data['ban_state'] = {}
+
     if LIMIT_DICT.get(groups[0]):
         limits = LIMIT_DICT.get(groups[0])
         for limit in limits:
-            chat_data['ban_state'][limit] = groups[1]
+            if groups[1] == "on":
+                if chat_data['ban_state'].get(limit):
+                    chat_data['ban_state'].pop()
+            else:
+                chat_data['ban_state'][limit] = groups[1]
     else:
-        chat_data['ban_state'][groups[0]] = True if groups[1] == "off" else False
+        if groups[1] == "on":
+            if chat_data['ban_state'].get(groups[0]):
+                chat_data['ban_state'].pop()
+        else:
+            chat_data['ban_state'][groups[0]] = True
     bot.send_message(update.message.chat_id, text=SET_OK_MSG)
     return RUN
 
