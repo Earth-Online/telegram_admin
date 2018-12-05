@@ -16,8 +16,8 @@ from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, 
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
     BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG, BANWORD_KEY
 from telegram.ext.dispatcher import run_async
-from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data
-from admin import update_admin_list
+from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data, kick_user
+from admin import update_admin_list, update_ban_list
 from module import DBSession
 from module.user import User
 from module.group import Group
@@ -92,7 +92,7 @@ def clearwarns(bot, update, args):
         bot.send_message(chat_id=update.message.chat_id, text="arg not user id")
         return
     if update.message.reply_to_message:
-        user_list.append(update.reply_to_message.from_user['id'])
+        user_list.append(update.message.reply_to_message.from_user['id'])
     if update.message.entities:
         for entity in update.message.entities:
             if entity.type == MessageEntity.MENTION:
@@ -229,6 +229,7 @@ def globalban(bot, update, args):
         ban_user_list.append(entity.user)
     ban_user(user_list=ban_user_list, ban=True)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    update_ban_list()
 
 
 @command_wrap(pass_args=True)
@@ -251,6 +252,7 @@ def unglobalban(bot, update, args):
         ban_user_list.append(entity.user)
     ban_user(user_list=ban_user_list, ban=False)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    update_ban_list()
 
 
 @command_wrap()
@@ -471,6 +473,31 @@ def save(bot, update):
     :return:
     """
     save_data()
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+
+
+@command_wrap(pass_args=True)
+@check_admin()
+@run_async
+def kick(bot, update, args):
+    """
+    :param args:
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    try:
+        user_list = [int(arg) for arg in args]
+    except ValueError:
+        bot.send_message(chat_id=update.message.chat_id, text="arg not user id")
+        return
+    if update.message.reply_to_message:
+        user_list.append(update.message.reply_to_message.from_user['id'])
+    ban_users = update.message.parse_entities(types=MessageEntity.MENTION)
+    user_list.extend([user['user']['id'] for user in ban_users.keys()])
+    kick_user(bot, update, user_list=user_list)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 

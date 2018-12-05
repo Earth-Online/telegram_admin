@@ -5,7 +5,7 @@ get some handler
 """
 from command import (start, run, add_admin, clearwarns, get_id, admins, get_groups, link, stop, info,
                      globalban, unglobalban, globalban_list, maxwarns, settimeflood, setflood, settings,
-                     banword, unbanword, banwords, save, lang, save_data
+                     banword, unbanword, banwords, save, lang, save_data, kick
                      )
 
 from telegram.ext import ConversationHandler, RegexHandler
@@ -15,11 +15,13 @@ from constant import RUN, STOP, SETTING_RE
 command_handler = [
     start,
     add_admin,
-    clearwarns,
     get_id,
     admins,
     get_groups,
     info,
+]
+
+admin_handler = [
     globalban_list,
     globalban,
     unglobalban,
@@ -32,16 +34,17 @@ command_handler = [
     settimeflood,
     banwords,
     save,
-    lang
+    lang,
+    clearwarns,
+    kick,
+    telegram_link_handler,
+    common_message_handler,
 ]
 
 messgae_handler = ConversationHandler(
     entry_points=[run],
     states={
-        RUN: [
-            telegram_link_handler,
-            common_message_handler,
-        ],
+        RUN: admin_handler,
         STOP: [
 
         ]

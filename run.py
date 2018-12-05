@@ -9,7 +9,7 @@ from logging import FileHandler, StreamHandler
 from telegram.ext import Updater, Dispatcher
 from config import LOG_LEVEL, TOKEN, LOG_FILE, CHAT_DATA_FILE, USER_DATA_FILE
 from handler import command_handler, messgae_handler, set_handler
-from admin import update_admin_list
+from admin import update_admin_list, update_ban_list
 
 f_handler = FileHandler(LOG_FILE)
 logging.basicConfig(
@@ -51,6 +51,7 @@ def main():
     dispatcher.add_handler(messgae_handler)
 
     update_admin_list()
+    update_ban_list()
     loaddata()
     logging.info('run bot')
     updater.start_polling()

@@ -108,3 +108,15 @@ def get_conv_data():
 def word_re(word_list: list):
     re = "|".join(word_list)
     return compile(re)
+
+
+def kick_user(bot, update, user_list):
+    """
+    :param user_list:
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    """
+    for user in user_list:
+        bot.kick_chat_member(chat_id=update.message.chat_id, user_id=user)

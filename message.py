@@ -4,10 +4,11 @@
 handle massage
 """
 import filter
+from admin import user_is_ban
 from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType
 from telegram import Update, Bot
 from telegram.ext.dispatcher import run_async
-from tool import messaage_warp, check_admin
+from tool import messaage_warp, check_admin, kick_user
 from telegram.ext.filters import Filters
 
 
@@ -30,7 +31,7 @@ def telegram_link_handler(bot, update, user_data, chat_data):
     warn_user(bot, update, user_data, chat_data)
 
 
-@messaage_warp(filters=(Filters.all & ~filter.ADMIN()),
+@messaage_warp(filters=(Filters.all & ~filter.Admin()),
                pass_chat_data=True, pass_user_data=True)
 @run_async
 def common_message_handler(bot, update, user_data, chat_data):
@@ -77,6 +78,14 @@ def limit_set(bot, update, chat_data, groups):
     bot.send_message(update.message.chat_id, text=SET_OK_MSG)
 
 
+@messaage_warp(filters=filter.NewMember)
+@run_async
+def new_member(bot, update):
+    for members in update.message.new_chat_members:
+        if user_is_ban(members.id):
+            kick_user(bot=bot, update=update, user_list=[members])
+
+
 def warn_user(bot, update, user_data, chat_data):
     """
 
@@ -90,3 +99,6 @@ def warn_user(bot, update, user_data, chat_data):
     if chat_data.get("ban_state", {}).get(BanMessageType.WARN) is False:
         bot.send_message(chat_id=update.message.chat_id, text=WARN_MSG)
         user_data['warn'] = user_data.get('warn', 0) + 1
+        if chat_data.get('maxwarn'):
+            if user_data['warn'] > chat_data.get('maxwarn'):
+                kick_user(bot, update, [update.message.from_user.id])
