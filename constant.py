@@ -97,7 +97,6 @@ class BanMessageType:
     VIDEONOTE = "videonote"
 
 
-
 LIMIT_DICT = {
     BanMessageType.MARKDOWN: [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL],
     BanMessageType.FORWARD: ["forward_date"]
@@ -123,3 +122,5 @@ allow_setting = [BanMessageType.__dict__[key] for key in filter(lambda x: x[0] !
 allow_str = "|".join(allow_setting)
 SETTING_RE = re.compile(f"^({allow_str})\s+(on|off)$")
 NUM_RE = re.compile(r"\d")
+
+BANWORD_KEY = "banwordre"

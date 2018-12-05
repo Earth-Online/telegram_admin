@@ -9,6 +9,7 @@ from functools import wraps
 from telegram.ext import CommandHandler, MessageHandler
 from admin import user_is_admin
 from telegram.ext import Dispatcher
+from re import compile, w
 
 
 def command_wrap(name: str = "", pass_chat_data=False, pass_user_data=False, pass_args=False, **kwargs):
@@ -31,7 +32,9 @@ def messaage_warp(**kwargs):
         @wraps(func)
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
+
         return MessageHandler(callback=wrapper, **kwargs)
+
     return decorator
 
 
@@ -72,3 +75,8 @@ def get_chat_data(chat_id=None) -> dict:
 def get_user_data(user_id=None) -> dict:
     dispatcher = Dispatcher.get_instance()
     return dispatcher.user_data[user_id] if user_id else dispatcher.user_data
+
+
+def word_re(word_list: list):
+    re = "|".join(word_list)
+    return compile(re)

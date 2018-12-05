@@ -10,8 +10,8 @@ from telegram.chatmember import ChatMember
 from telegram import ParseMode
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
-    BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG
-from tool import command_wrap, check_admin
+    BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG, BANWORD_KEY
+from tool import command_wrap, check_admin, word_re
 from admin import update_admin_list
 from module import DBSession
 from module.user import User
@@ -350,6 +350,7 @@ def banword(bot, update, args, chat_data):
     group_banwords = chat_data.get(BanMessageType.WORD, [])
     group_banwords.extend(args)
     chat_data[BanMessageType.WORD] = group_banwords
+    chat_data[BANWORD_KEY] = word_re(group_banwords)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
@@ -377,6 +378,10 @@ def unbanword(bot, update, args, chat_data):
             continue
     chat_data[BanMessageType.WORD] = group_banwords
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    if not len(group_banwords):
+        chat_data[BANWORD_KEY] = None
+        return
+    chat_data[BANWORD_KEY] = word_re(group_banwords)
 
 
 @command_wrap(pass_chat_data=True)

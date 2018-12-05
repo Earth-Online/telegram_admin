@@ -3,7 +3,6 @@
 """
 docs
 """
-
 from telegram.ext.filters import BaseFilter
 from telegram.messageentity import MessageEntity
 from urllib.parse import urlparse
@@ -11,8 +10,7 @@ from tool import check_ban_state, get_chat_data, get_user_data
 from langdetect import detect
 from datetime import datetime
 from emoji import emoji_count
-
-from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE
+from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, BANWORD_KEY
 
 
 class TelegramLink(BaseFilter):
@@ -93,3 +91,14 @@ class Numbers(BaseFilter):
         if not check_ban_state(message.chat_id, BanMessageType.NUMBERS):
             return False
         return NUM_RE.search(message.text)
+
+
+class BanWord(BaseFilter):
+    def filter(self, message):
+        if not check_ban_state(message.chat_id, BanMessageType.BANWORD):
+            return False
+        chat_data: dict = get_chat_data(chat_id=message.chat_id)
+        re = chat_data.get(BANWORD_KEY)
+        if not re:
+            return False
+        return re.search(message.text)
