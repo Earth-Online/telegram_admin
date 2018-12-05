@@ -15,11 +15,11 @@ f_handler = FileHandler(LOG_FILE)
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=LOG_LEVEL,
-    handlers=f_handler
+    handlers=[f_handler, StreamHandler()]
 )
 
 logger_telegram = logging.getLogger('telegram')
-logger_telegram.setLevel(level=Warning)
+logger_telegram.setLevel(level=logging.WARN)
 
 
 def loaddata():

@@ -409,6 +409,34 @@ def banwords(bot, update, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 
+@command_wrap(pass_chat_data=True, pass_args=True)
+@check_admin()
+def lang(bot, update, args, chat_data):
+    """
+    :param chat_data:
+    :param args:
+    :param args:
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    if len(args) < 2:
+        bot.send_message(chat_id=update.message.chat_id, text=BANWORD_ERROR)
+        return
+    ban_list: list = chat_data.get(BanMessageType.LANG, [])
+    if args[1] == "off":
+        ban_list.append(args[0])
+        chat_data[BanMessageType.LANG] = ban_list
+    elif args[1] == "on":
+        try:
+            ban_list.remove(args[0])
+        except ValueError:
+            pass
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+
+
 @command_wrap()
 @check_admin()
 def save(bot, update):

@@ -30,7 +30,6 @@ def telegram_link_handler(bot, update, user_data, chat_data):
 
 @messaage_warp(filters=(Filters.all & ~filter.ADMIN()),
                pass_chat_data=True, pass_user_data=True)
-@check_admin(admin=False)
 def common_message_handler(bot, update, user_data, chat_data):
     """
     :param user_data:
@@ -54,7 +53,6 @@ def common_message_handler(bot, update, user_data, chat_data):
             if entity.type in ban_state.keys():
                 update.message.delete()
                 warn_user(bot, update, user_data, chat_data)
-
             return
     if ban_state.get('all'):
         update.message.delete()
@@ -85,6 +83,6 @@ def warn_user(bot, update, user_data, chat_data):
     :type user_data: dict
     :return:
     """
-    if chat_data.get(BanMessageType.WARN):
+    if chat_data.get("ban_state", {}).get(BanMessageType.WARN):
         bot.send_message(chat_id=update.message.chat_id, text=WARN_MSG)
-    user_data['warn'] = user_data.get('warn', 0) + 1
+        user_data['warn'] = user_data.get('warn', 0) + 1

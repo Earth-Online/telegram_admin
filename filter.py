@@ -19,11 +19,15 @@ class TelegramLink(BaseFilter):
         if not check_ban_state(message.chat_id, BanMessageType.TG_LINK):
             return False
         urls = message.parse_entities(types=MessageEntity.URL)
-        if not len(urls):
-            return False
-        for url in urls.keys():
-            if urlparse(url.url).netloc in TELEGRAM_DOMAIN:
-                return True
+        if len(urls):
+            for url in urls.values():
+                if urlparse(url).netloc in TELEGRAM_DOMAIN:
+                    return True
+        urls = message.parse_entities(types=MessageEntity.TEXT_LINK)
+        if len(urls):
+            for url in urls.keys():
+                if urlparse(url.url).netloc in TELEGRAM_DOMAIN:
+                    return True
         return False
 
 
