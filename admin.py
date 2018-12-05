@@ -14,9 +14,9 @@ admin_list = []
 def update_admin_list():
     logging.debug('update admin list ing')
     session = DBSession()
-    db_admin = session.query(User).filter_by(isadmin=True).all()
+    db_admin = session.query(User.id).filter_by(isadmin=True).all()
     global admin_list
-    admin_list = ADMIN + db_admin
+    admin_list = ADMIN + [int(user.id) for user in db_admin]
     logging.debug(f"admin list {admin_list}")
     session.close()
 
@@ -34,7 +34,7 @@ def update_ban_list():
     session = DBSession()
     db_admin = session.query(User).filter_by(isban=True).all()
     global ban_list
-    ban_list = ADMIN + db_admin
+    ban_list = [int(user.id) for user in db_admin]
     logging.debug(f"ban list {ban_list}")
     session.close()
 
