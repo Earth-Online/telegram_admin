@@ -164,7 +164,7 @@ def get_groups(bot, update):
     session.close()
 
 
-@command_wrap()
+@command_wrap(state=ConversationHandler.END)
 @check_admin()
 @run_async
 def stop(bot, update):
@@ -176,7 +176,7 @@ def stop(bot, update):
     :return:
     """
     bot.send_message(chat_id=update.message.chat_id, text=BOT_STOP_MSG)
-    return ConversationHandler.END
+    # return ConversationHandler.END
 
 
 @command_wrap()
