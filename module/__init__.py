@@ -12,3 +12,5 @@ Engine = create_engine(DB_URL)
 DBSession = sessionmaker(bind=Engine)
 
 Base.metadata.create_all(Engine)
+
+session = DBSession()
