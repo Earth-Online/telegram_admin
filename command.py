@@ -17,7 +17,7 @@ from config import CHAT_DATA_FILE, USER_DATA_FILE, CONV_DATA_FILE
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
     BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG, BANWORD_KEY, \
-    LANGDATA_KEY, TIME_END, BAN_STATE, START_TIME_MSG, STOP_TIME_MSG, AUTO_LOOK_START
+    LANGDATA_KEY, TIME_END, BAN_STATE, START_TIME_MSG, STOP_TIME_MSG, AUTO_LOOK_START, AUTO_LOOK_STOP
 from telegram.ext.dispatcher import run_async
 from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data, kick_user, \
     messaage_warp
@@ -559,7 +559,7 @@ def autolock(bot, update):
     update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
 
 
-@command_wrap()
+@command_wrap(state=ConversationHandler.END)
 @check_admin()
 def cancel(bot, update):
     """
@@ -569,7 +569,7 @@ def cancel(bot, update):
     :type update: Update
     :return:
     """
-    return ConversationHandler.END
+    pass
 
 
 @messaage_warp(filters=Filters.all, pass_chat_data=True)
@@ -592,7 +592,7 @@ def lockstart(bot, update, chat_data):
         return START_TIME
     chat_data[AUTO_LOOK_START] = time
     update.message.reply_text(text=STOP_TIME_MSG, reply_markup=ForceReply())
-    return STOP_TIME_MSG
+    return STOP_TIME
 
 
 @messaage_warp(filters=Filters.all, pass_chat_data=True)
@@ -608,13 +608,13 @@ def lockstop(bot, update, chat_data):
     """
     if not update.message.text:
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
-        return STOP_TIME_MSG
+        return STOP_TIME
     try:
         time = datetime.strptime(update.message.text, "%H:%M")
     except ValueError:
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
-        return STOP_TIME_MSG
-    chat_data[AUTO_LOOK_START] = time
+        return STOP_TIME
+    chat_data[AUTO_LOOK_STOP] = time
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
     return ConversationHandler.END
 

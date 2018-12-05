@@ -51,12 +51,12 @@ admin_handler = [
 auto_lock_handler = ConversationHandler(
     entry_points=[autolock],
     states={
-        START_TIME: {
+        START_TIME: [
             lockstart
-        },
-        STOP_TIME: {
+        ],
+        STOP_TIME: [
             lockstop
-        }
+        ]
     },
     fallbacks=[cancel]
 )
