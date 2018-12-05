@@ -9,7 +9,7 @@ from logging import FileHandler, StreamHandler
 from telegram.ext import Updater, Dispatcher
 
 from command import save_data
-from config import LOG_LEVEL, TOKEN, LOG_FILE, CHAT_DATA_FILE, USER_DATA_FILE, DEFAULT_CHECK_TIME
+from config import LOG_LEVEL, TOKEN, LOG_FILE, CHAT_DATA_FILE, USER_DATA_FILE, DEFAULT_CHECK_TIME, CONV_DATA_FILE
 from handler import command_handler, messgae_handler, set_handler, stop_handler
 from admin import update_admin_list, update_ban_list
 
@@ -36,6 +36,12 @@ def loaddata():
         with open(USER_DATA_FILE, "rb") as f:
             user_data = pickle.load(f)
             dispatch.user_data = user_data
+    except FileNotFoundError:
+        logging.warning("user_data file not found")
+    try:
+        with open(CONV_DATA_FILE, "rb") as f:
+            conv_data = pickle.load(f)
+            messgae_handler.conversations = conv_data
     except FileNotFoundError:
         logging.warning("user_data file not found")
 

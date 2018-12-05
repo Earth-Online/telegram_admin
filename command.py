@@ -224,7 +224,8 @@ def globalban(bot, update, args):
     if len(args):
         bot.send_message(chat_id=update.message.chat_id, text=NO_GET_USENAME_MSG)
     for _ in args:
-        ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
+        if _.isdigit():
+            ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
     for entity in update.message.parse_entities(MessageEntity.MENTION).keys():
         ban_user_list.append(entity.user)
     ban_user(user_list=ban_user_list, ban=True)
@@ -247,7 +248,8 @@ def unglobalban(bot, update, args):
     if len(args):
         bot.send_message(chat_id=update.message.chat_id, text=NO_GET_USENAME_MSG)
     for _ in args:
-        ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
+        if _.isdigit():
+            ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
     for entity in update.message.parse_entities(MessageEntity.MENTION).keys():
         ban_user_list.append(entity.user)
     ban_user(user_list=ban_user_list, ban=False)
@@ -270,9 +272,11 @@ def globalban_list(bot, update):
     datas = session.query(User).filter_by(isban=True).all()
     ret_text = ""
     for data in datas:
-        ret_text = GLOBAL_BAN_FORMAT.format(user_name=data.username, user_id=data.id)
+        ret_text = ret_text + GLOBAL_BAN_FORMAT.format(user_name=data.username, user_id=data.id)
+    session.close()
     if ret_text == "":
         bot.send_message(chat_id=update.message.chat_id, text="not have some globalban")
+        return
     bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
 
 

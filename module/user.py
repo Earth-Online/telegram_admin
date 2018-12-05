@@ -16,5 +16,5 @@ class User(Base):
     # user_id
     id = Column(String(20), primary_key=True)
     username = Column(String(50))
-    isadmin = Column(Boolean, unique=False, default=False)
-    isban = Column(Boolean, unique=False, default=False)
+    isadmin = Column(Boolean, default=False)
+    isban = Column(Boolean, default=False)
