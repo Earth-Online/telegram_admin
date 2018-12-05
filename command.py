@@ -161,6 +161,7 @@ def get_groups(bot, update):
         ret_text = ret_text + GROUP_FORMAT.format(group_title=group.title, group_id=group.id,
                                                   group_link=group.link)
     bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
+    session.close()
 
 
 @command_wrap()
