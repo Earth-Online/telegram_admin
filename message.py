@@ -6,6 +6,7 @@ handle massage
 import filter
 from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType
 from telegram import Update, Bot
+from telegram.ext.dispatcher import run_async
 from tool import messaage_warp, check_admin
 from telegram.ext.filters import Filters
 
@@ -14,6 +15,7 @@ from telegram.ext.filters import Filters
                         filter.Lang() | filter.Emoji() | filter.Gif() | filter.Numbers()
                         | filter.BanWord()), pass_chat_data=True,
                pass_user_data=True)
+@run_async
 def telegram_link_handler(bot, update, user_data, chat_data):
     """
     :param chat_data:
@@ -30,6 +32,7 @@ def telegram_link_handler(bot, update, user_data, chat_data):
 
 @messaage_warp(filters=(Filters.all & ~filter.ADMIN()),
                pass_chat_data=True, pass_user_data=True)
+@run_async
 def common_message_handler(bot, update, user_data, chat_data):
     """
     :param user_data:
@@ -61,6 +64,7 @@ def common_message_handler(bot, update, user_data, chat_data):
 
 
 @check_admin(admin=True)
+@run_async
 def limit_set(bot, update, chat_data, groups):
     if not chat_data.get('ban_state'):
         chat_data['ban_state'] = {}
@@ -69,7 +73,7 @@ def limit_set(bot, update, chat_data, groups):
         for limit in limits:
             chat_data['ban_state'][limit] = groups[1]
     else:
-        chat_data['ban_state'][groups[0]] = True if groups[1] == "off" else None
+        chat_data['ban_state'][groups[0]] = True if groups[1] == "off" else False
     bot.send_message(update.message.chat_id, text=SET_OK_MSG)
 
 
@@ -83,6 +87,6 @@ def warn_user(bot, update, user_data, chat_data):
     :type user_data: dict
     :return:
     """
-    if chat_data.get("ban_state", {}).get(BanMessageType.WARN):
+    if chat_data.get("ban_state", {}).get(BanMessageType.WARN) is False:
         bot.send_message(chat_id=update.message.chat_id, text=WARN_MSG)
         user_data['warn'] = user_data.get('warn', 0) + 1

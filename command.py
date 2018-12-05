@@ -15,6 +15,7 @@ from config import CHAT_DATA_FILE, USER_DATA_FILE
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
     BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG, BANWORD_KEY
+from telegram.ext.dispatcher import run_async
 from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data
 from admin import update_admin_list
 from module import DBSession
@@ -23,6 +24,7 @@ from module.group import Group
 
 
 @command_wrap()
+@run_async
 def start(bot, update):
     """
     send start info
@@ -56,6 +58,7 @@ def add_admin(bot, update, args):
 
 @command_wrap()
 @check_admin()
+@run_async
 def run(bot, update):
     """
     :param bot:
@@ -81,6 +84,7 @@ def run(bot, update):
 
 @command_wrap(pass_args=True)
 @check_admin()
+@run_async
 def clearwarns(bot, update, args):
     try:
         user_list = [int(arg) for arg in args]
@@ -102,6 +106,7 @@ def clearwarns(bot, update, args):
 
 
 @command_wrap(name='id')
+@run_async
 def get_id(bot, update):
     """
 
@@ -117,6 +122,7 @@ def get_id(bot, update):
 
 
 @command_wrap()
+@run_async
 def admins(bot, update):
     """
 
@@ -139,6 +145,7 @@ def admins(bot, update):
 
 @command_wrap(name="groups")
 @check_admin()
+@run_async
 def get_groups(bot, update):
     """
     :param bot:
@@ -158,6 +165,7 @@ def get_groups(bot, update):
 
 @command_wrap()
 @check_admin()
+@run_async
 def stop(bot, update):
     """
     :param bot:
@@ -172,6 +180,7 @@ def stop(bot, update):
 
 @command_wrap()
 @check_admin()
+@run_async
 def link(bot, update):
     """
     :param bot:
@@ -185,6 +194,7 @@ def link(bot, update):
 
 
 @command_wrap()
+@run_async
 def info(bot, update):
     """
     :param bot:
@@ -200,6 +210,7 @@ def info(bot, update):
 
 @command_wrap(pass_args=True)
 @check_admin()
+@run_async
 def globalban(bot, update, args):
     """
     :param bot:
@@ -221,6 +232,7 @@ def globalban(bot, update, args):
 
 @command_wrap(pass_args=True)
 @check_admin()
+@run_async
 def unglobalban(bot, update, args):
     """
     :param bot:
@@ -242,6 +254,7 @@ def unglobalban(bot, update, args):
 
 @command_wrap()
 @check_admin()
+@run_async
 def globalban_list(bot, update):
     """
     :param bot:
@@ -262,6 +275,7 @@ def globalban_list(bot, update):
 
 @command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@run_async
 def maxwarns(bot, update, args, chat_data):
     """
     :param args:
@@ -280,6 +294,7 @@ def maxwarns(bot, update, args, chat_data):
 
 @command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@run_async
 def settimeflood(bot, update, args, chat_data):
     """
     :param args:
@@ -300,6 +315,7 @@ def settimeflood(bot, update, args, chat_data):
 
 @command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@run_async
 def setflood(bot, update, args, chat_data):
     """
     :param args:
@@ -320,6 +336,7 @@ def setflood(bot, update, args, chat_data):
 
 @command_wrap(pass_chat_data=True)
 @check_admin()
+@run_async
 def settings(bot, update, chat_data):
     """
     :param chat_data:
@@ -338,6 +355,7 @@ def settings(bot, update, chat_data):
 
 @command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@run_async
 def banword(bot, update, args, chat_data):
     """
     :param chat_data:
@@ -361,6 +379,7 @@ def banword(bot, update, args, chat_data):
 
 @command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@run_async
 def unbanword(bot, update, args, chat_data):
     """
     :param chat_data:
@@ -391,6 +410,7 @@ def unbanword(bot, update, args, chat_data):
 
 @command_wrap(pass_chat_data=True)
 @check_admin()
+@run_async
 def banwords(bot, update, chat_data):
     """
     :param chat_data:
@@ -411,6 +431,7 @@ def banwords(bot, update, chat_data):
 
 @command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@run_async
 def lang(bot, update, args, chat_data):
     """
     :param chat_data:
@@ -439,6 +460,7 @@ def lang(bot, update, args, chat_data):
 
 @command_wrap()
 @check_admin()
+@run_async
 def save(bot, update):
     """
     :param bot:

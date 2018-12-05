@@ -95,11 +95,13 @@ class BanMessageType:
     URL = "url"
     WORD = "banword"
     VIDEONOTE = "videonote"
+    LINK = "link"
 
 
 LIMIT_DICT = {
     BanMessageType.MARKDOWN: [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL],
-    BanMessageType.FORWARD: ["forward_date"]
+    BanMessageType.FORWARD: ["forward_date"],
+    BanMessageType.LINK: [BanMessageType.URL, BanMessageType.TEXT_LINK]
 }
 
 
