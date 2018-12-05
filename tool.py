@@ -9,13 +9,13 @@ from functools import wraps
 from telegram.ext import CommandHandler, MessageHandler, ConversationHandler
 from telegram.ext.dispatcher import DEFAULT_GROUP
 from telegram.utils.promise import Promise
-
+from constant import RUN
 from admin import user_is_admin
 from telegram.ext import Dispatcher
 from re import compile
 
 
-def command_wrap(name: str = "", pass_chat_data=False, pass_user_data=False, pass_args=False, **kwargs):
+def command_wrap(name: str = "", state=RUN, pass_chat_data=False, pass_user_data=False, pass_args=False, **kwargs):
     """
     wrap command handle
     """
@@ -23,7 +23,10 @@ def command_wrap(name: str = "", pass_chat_data=False, pass_user_data=False, pas
     def decorator(func):
         def wrapper(*args, **kwargs):
             logging.debug(f"call {func.__name__} ")
-            return func(*args, **kwargs)
+            ret = func(*args, **kwargs)
+            if state:
+                return state
+            return ret
 
         return CommandHandler(name or func.__name__, pass_chat_data=pass_chat_data, pass_user_data=pass_user_data,
                               pass_args=pass_args, callback=wrapper, **kwargs)

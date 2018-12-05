@@ -501,7 +501,7 @@ def kick(bot, update, args):
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-def save_data():
+def save_data(_=None, __=None):
     user_data = get_user_data()
     chat_data = get_chat_data()
     conv_data = get_conv_data()
