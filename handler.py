@@ -3,6 +3,7 @@
 """
 get some handler
 """
+import logging
 from command import (start, run, add_admin, clearwarns, get_id, admins, get_groups, link, stop, info,
                      globalban, unglobalban, globalban_list, maxwarns, settimeflood, setflood, settings,
                      banword, unbanword, banwords, save, lang, save_data, kick
@@ -59,3 +60,9 @@ messgae_handler = ConversationHandler(
 
 def stop_handler(sign, frame):
     save_data()
+
+
+def error_handler(bot, update, error):
+    bot.send_message(chat_id=update.message.chat_id, text="a error")
+    logging.error(error)
+    return messgae_handler.current_conversation
