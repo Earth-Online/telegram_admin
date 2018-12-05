@@ -92,7 +92,6 @@ class BanMessageType:
     WARN = "warn"
     BANWORD = "banword"
     URL = "url"
-    WORD = "banword"
     VIDEONOTE = "videonote"
     LINK = "link"
 

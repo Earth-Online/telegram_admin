@@ -93,6 +93,8 @@ class Emoji(BaseFilter):
     def filter(self, message):
         if not check_ban_state(message.chat_id, BanMessageType.EMOJI):
             return False
+        if not message.text:
+            return False
         if emoji_count(message.text):
             return True
         return False
@@ -101,6 +103,8 @@ class Emoji(BaseFilter):
 class Numbers(BaseFilter):
     def filter(self, message):
         if not check_ban_state(message.chat_id, BanMessageType.NUMBERS):
+            return False
+        if not message.text:
             return False
         return NUM_RE.search(message.text)
 
@@ -112,6 +116,8 @@ class BanWord(BaseFilter):
         chat_data: dict = get_chat_data(chat_id=message.chat_id)
         re = chat_data.get(BANWORD_KEY)
         if not re:
+            return False
+        if not message.text:
             return False
         return re.search(message.text)
 

@@ -12,6 +12,8 @@ from telegram.ext import ConversationHandler, RegexHandler
 from message import common_message_handler, telegram_link_handler, limit_set
 from constant import RUN, STOP, SETTING_RE
 
+set_handler = RegexHandler(callback=limit_set, pattern=SETTING_RE, pass_chat_data=True, pass_groups=True)
+
 command_handler = [
     start,
     add_admin,
@@ -37,6 +39,7 @@ admin_handler = [
     lang,
     clearwarns,
     kick,
+    set_handler,
     telegram_link_handler,
     common_message_handler,
 ]
@@ -52,8 +55,6 @@ messgae_handler = ConversationHandler(
     },
     fallbacks=[stop]
 )
-
-set_handler = RegexHandler(callback=limit_set, pattern=SETTING_RE, pass_chat_data=True, pass_groups=True)
 
 
 def stop_handler(sign, frame):
