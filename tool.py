@@ -6,7 +6,10 @@ module docs
 import logging
 from telegram import Update, Bot
 from functools import wraps
-from telegram.ext import CommandHandler, MessageHandler
+from telegram.ext import CommandHandler, MessageHandler, ConversationHandler
+from telegram.ext.dispatcher import DEFAULT_GROUP
+from telegram.utils.promise import Promise
+
 from admin import user_is_admin
 from telegram.ext import Dispatcher
 from re import compile
@@ -75,8 +78,31 @@ def get_chat_data(chat_id=None) -> dict:
 
 
 def get_user_data(user_id=None) -> dict:
-    dispatcher = Dispatcher.get_instance()
+    dispatcher: Dispatcher = Dispatcher.get_instance()
+    dispatcher.handlers.get(DEFAULT_GROUP)
     return dispatcher.user_data[user_id] if user_id else dispatcher.user_data
+
+
+def get_conv_data():
+    """
+    some hack code
+    :return:
+    """
+    dispatcher: Dispatcher = Dispatcher.get_instance()
+    handlers = dispatcher.handlers.get(DEFAULT_GROUP)
+    for handler in handlers:
+        if isinstance(handler, ConversationHandler):
+            resolved = dict()
+            for k, v in handler.conversations.items():
+                if isinstance(v, tuple) and len(v) is 2 and isinstance(v[1], Promise):
+                    try:
+                        new_state = v[1].result()  # Result of async function
+                    except:
+                        new_state = v[0]  # In case async function raised an error, fallback to old state
+                    resolved[k] = new_state
+                else:
+                    resolved[k] = v
+            return resolved
 
 
 def word_re(word_list: list):

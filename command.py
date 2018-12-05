@@ -11,12 +11,12 @@ from telegram.ext import Dispatcher, ConversationHandler
 from telegram.chatmember import ChatMember
 from telegram import ParseMode
 
-from config import CHAT_DATA_FILE, USER_DATA_FILE
+from config import CHAT_DATA_FILE, USER_DATA_FILE, CONV_DATA_FILE
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
     BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG, BANWORD_KEY
 from telegram.ext.dispatcher import run_async
-from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data
+from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data
 from admin import update_admin_list
 from module import DBSession
 from module.user import User
@@ -470,13 +470,20 @@ def save(bot, update):
     :type update: Update
     :return:
     """
+    save_data()
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+
+
+def save_data():
     user_data = get_user_data()
     chat_data = get_chat_data()
+    conv_data = get_conv_data()
     with open(CHAT_DATA_FILE, 'wb+') as f:
         pickle.dump(chat_data, f)
     with open(USER_DATA_FILE, 'wb+') as f:
         pickle.dump(user_data, f)
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    with open(CONV_DATA_FILE, 'wb+') as f:
+        pickle.dump(conv_data, f)
 
 
 def ban_user(user_list, ban=True):
