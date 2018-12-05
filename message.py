@@ -28,7 +28,7 @@ def telegram_link_handler(bot, update, user_data, chat_data):
     warn_user(bot, update, user_data, chat_data)
 
 
-@messaage_warp(filters=Filters.all,
+@messaage_warp(filters=(Filters.all & ~filter.ADMIN()),
                pass_chat_data=True, pass_user_data=True)
 @check_admin(admin=False)
 def common_message_handler(bot, update, user_data, chat_data):

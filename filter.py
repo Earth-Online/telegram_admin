@@ -11,6 +11,7 @@ from langdetect import detect
 from datetime import datetime
 from emoji import emoji_count
 from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, BANWORD_KEY
+from admin import user_is_admin
 
 
 class TelegramLink(BaseFilter):
@@ -102,3 +103,8 @@ class BanWord(BaseFilter):
         if not re:
             return False
         return re.search(message.text)
+
+
+class ADMIN(BaseFilter):
+    def filter(self, message):
+        return user_is_admin(message.from_user['id'])

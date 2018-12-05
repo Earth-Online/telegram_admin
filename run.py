@@ -5,7 +5,7 @@ run bot
 """
 import logging
 import pickle
-from logging import FileHandler
+from logging import FileHandler, StreamHandler
 from telegram.ext import Updater, Dispatcher
 from config import LOG_LEVEL, TOKEN, LOG_FILE, CHAT_DATA_FILE, USER_DATA_FILE
 from handler import command_handler, messgae_handler, set_handler
@@ -29,13 +29,13 @@ def loaddata():
             chat_data = pickle.load(f)
             dispatch.chat_data = chat_data
     except FileNotFoundError:
-        logging.WARN("chat_data file not found")
+        logging.warning("chat_data file not found")
     try:
         with open(USER_DATA_FILE, "rb") as f:
             user_data = pickle.load(f)
             dispatch.user_data = user_data
     except FileNotFoundError:
-        logging.WARN("user_data file not found")
+        logging.warning("user_data file not found")
 
 
 def main():

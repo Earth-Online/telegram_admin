@@ -332,7 +332,7 @@ def settings(bot, update, chat_data):
     ret_text = ""
     limit = chat_data.get("ban_state", {})
     for setting in allow_setting:
-        ret_text = ret_text + f"{setting}" + (NO if limit.get(setting) else NO) + "\n"
+        ret_text = ret_text + f"{setting}" + (NO if limit.get(setting) else OK) + "\n"
     bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 
