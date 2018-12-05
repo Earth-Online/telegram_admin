@@ -508,6 +508,7 @@ def kick(bot, update, args):
 
 @command_wrap(pass_args=True, pass_chat_data=True)
 @check_admin()
+@run_async
 def lock(bot, update, args, chat_data):
     """
     :param args:
@@ -527,6 +528,7 @@ def lock(bot, update, args, chat_data):
 
 @command_wrap(pass_chat_data=True)
 @check_admin()
+@run_async
 def unlock(bot, update, chat_data):
     """
     :param chat_data:
@@ -544,7 +546,7 @@ START_TIME = 999
 STOP_TIME = 1000
 
 
-@command_wrap()
+@command_wrap(state=START_TIME)
 @check_admin()
 def autolock(bot, update):
     """
@@ -555,7 +557,6 @@ def autolock(bot, update):
     :return:
     """
     update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
-    return START_TIME
 
 
 @command_wrap()
@@ -571,8 +572,9 @@ def cancel(bot, update):
     return ConversationHandler.END
 
 
-@messaage_warp(filters=Filters.all)
+@messaage_warp(filters=Filters.all, pass_chat_data=True)
 @check_admin()
+@run_async
 def lockstart(bot, update, chat_data):
     """
     :param chat_data:
@@ -584,7 +586,7 @@ def lockstart(bot, update, chat_data):
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
         return START_TIME
     try:
-        time = datetime.strftime(update.message.text)
+        time = datetime.strptime(update.message.text, "%H:%M")
     except ValueError:
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
         return START_TIME
@@ -593,8 +595,9 @@ def lockstart(bot, update, chat_data):
     return STOP_TIME_MSG
 
 
-@messaage_warp(filters=Filters.all)
+@messaage_warp(filters=Filters.all, pass_chat_data=True)
 @check_admin()
+@run_async
 def lockstop(bot, update, chat_data):
     """
     :param bot:
@@ -607,11 +610,12 @@ def lockstop(bot, update, chat_data):
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
         return STOP_TIME_MSG
     try:
-        time = datetime.strftime(update.message.text)
+        time = datetime.strptime(update.message.text, "%H:%M")
     except ValueError:
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
         return STOP_TIME_MSG
     chat_data[AUTO_LOOK_START] = time
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
     return ConversationHandler.END
 
 

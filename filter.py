@@ -10,7 +10,8 @@ from tool import check_ban_state, get_chat_data, get_user_data
 from langdetect import detect, DetectorFactory
 from datetime import datetime
 from emoji import emoji_count
-from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, BANWORD_KEY, LANGDATA_KEY, TIME_END
+from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, BANWORD_KEY, LANGDATA_KEY, TIME_END, AUTO_LOOK_START, \
+    AUTO_LOOK_STOP
 from admin import user_is_admin, user_is_ban
 
 
@@ -136,9 +137,27 @@ class NewMember(BaseFilter):
 
 class Lock(BaseFilter):
     def filter(self, message):
-        if not check_ban_state(message.chat_id, TIME_END):
+        time = get_chat_data(message.chat_id).get(TIME_END)
+        if not time:
             return False
-        time = get_chat_data(message.chat_id)[TIME_END]
-        if message.date < time:
+        if message.date.timestamp() < time:
+            return True
+        return False
+
+
+class AutoLock(BaseFilter):
+    def filter(self, message):
+        chat_data = get_chat_data(message.chat_id)
+        time_start: datetime = chat_data.get(AUTO_LOOK_START)
+        time_stop: datetime = chat_data.get(AUTO_LOOK_STOP)
+        if not time_start or not time_stop:
+            return False
+        if message.date.hour < time_start.hour or message.date.hour > time_stop.hour:
+            return False
+        if time_start.hour < message.date.hour < time_stop.hour:
+            return True
+        if message.date.hour == time_start.hour and message.date.minute > time_start.minute:
+            return True
+        if message.date.hour == time_stop.hour and message.date.minute < time_stop.minute:
             return True
         return False

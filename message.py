@@ -14,7 +14,7 @@ from telegram.ext.filters import Filters
 
 @messaage_warp(filters=(filter.TelegramLink() | filter.Lang() | filter.Flood() |
                         filter.Emoji() | filter.Gif() | filter.Numbers()
-                        | filter.BanWord() | filter.Lock()), pass_chat_data=True,
+                        | filter.BanWord() | filter.Lock() | filter.AutoLock()), pass_chat_data=True,
                pass_user_data=True)
 @run_async
 def telegram_link_handler(bot, update, user_data, chat_data):

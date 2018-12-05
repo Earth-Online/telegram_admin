@@ -52,10 +52,10 @@ auto_lock_handler = ConversationHandler(
     entry_points=[autolock],
     states={
         START_TIME: {
-            MessageHandler(callback=lockstart)
+            lockstart
         },
         STOP_TIME: {
-            MessageHandler(callback=lockstop)
+            lockstop
         }
     },
     fallbacks=[cancel]
