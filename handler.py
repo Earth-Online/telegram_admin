@@ -5,7 +5,7 @@ get some handler
 """
 from command import (start, run, add_admin, clearwarns, get_id, admins, get_groups, link, stop, info,
                      globalban, unglobalban, globalban_list, maxwarns, settimeflood, setflood, settings,
-                     banword, unbanword, banwords
+                     banword, unbanword, banwords, save
                      )
 from telegram.ext import ConversationHandler, RegexHandler
 from message import common_message_handler, telegram_link_handler, limit_set
@@ -29,7 +29,8 @@ command_handler = [
     setflood,
     settings,
     settimeflood,
-    banwords
+    banwords,
+    save
 ]
 
 messgae_handler = ConversationHandler(

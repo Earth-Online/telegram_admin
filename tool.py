@@ -9,7 +9,7 @@ from functools import wraps
 from telegram.ext import CommandHandler, MessageHandler
 from admin import user_is_admin
 from telegram.ext import Dispatcher
-from re import compile, w
+from re import compile
 
 
 def command_wrap(name: str = "", pass_chat_data=False, pass_user_data=False, pass_args=False, **kwargs):

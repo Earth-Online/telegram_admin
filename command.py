@@ -3,15 +3,19 @@
 """
 bot command
 """
+import pickle
+
 from telegram import Update, Bot, MessageEntity
 from telegram import User as tg_user
 from telegram.ext import Dispatcher, ConversationHandler
 from telegram.chatmember import ChatMember
 from telegram import ParseMode
+
+from config import CHAT_DATA_FILE, USER_DATA_FILE
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
     BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG, BANWORD_KEY
-from tool import command_wrap, check_admin, word_re
+from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data
 from admin import update_admin_list
 from module import DBSession
 from module.user import User
@@ -66,7 +70,8 @@ def run(bot, update):
         bot.send_message(chat_id=update.message.chat_id, text=BOT_NO_ADMIN_MSG)
         return
     session = DBSession()
-    group = Group(id=update.message.chat_id, title=update.message.chat.title, link=update.message.chat.invite_link)
+    group_link = bot.export_chat_invite_link(chat_id=update.message.chat_id)
+    group = Group(id=update.message.chat_id, title=update.message.chat.title, link=group_link)
     session.merge(group)
     session.commit()
     session.close()
@@ -327,8 +332,8 @@ def settings(bot, update, chat_data):
     ret_text = ""
     limit = chat_data.get("ban_state", {})
     for setting in allow_setting:
-        ret_text = ret_text + f"{setting} \n" + (OK if limit.get(setting) else NO)
-    bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
+        ret_text = ret_text + f"{setting}" + (NO if limit.get(setting) else NO) + "\n"
+    bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 
 @command_wrap(pass_chat_data=True, pass_args=True)
@@ -401,7 +406,26 @@ def banwords(bot, update, chat_data):
     for group_banword in group_banwords:
         ret_text = ret_text + BANWORD_FORMAT.format(word=group_banword)
     ret_text = GET_BANWORDS_MSG.format(banwords=ret_text)
-    bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
+    bot.send_message(chat_id=update.message.chat_id, text=ret_text)
+
+
+@command_wrap()
+@check_admin()
+def save(bot, update):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    user_data = get_user_data()
+    chat_data = get_chat_data()
+    with open(CHAT_DATA_FILE, 'wb+') as f:
+        pickle.dump(chat_data, f)
+    with open(USER_DATA_FILE, 'wb+') as f:
+        pickle.dump(user_data, f)
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
 def ban_user(user_list, ban=True):
