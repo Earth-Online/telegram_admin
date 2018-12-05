@@ -8,6 +8,7 @@ python-telegram-bot = "*"
 sqlalchemy = "*"
 langdetect = "*"
 emoji = "*"
+ujson = "*"
 
 [dev-packages]
 pytest = "*"
