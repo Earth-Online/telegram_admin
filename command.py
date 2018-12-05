@@ -18,7 +18,7 @@ from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, 
 from telegram.ext.dispatcher import run_async
 from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data
 from admin import update_admin_list
-from module import session
+from module import DBSession
 from module.user import User
 from module.group import Group
 
@@ -46,10 +46,12 @@ def add_admin(bot, update, args):
         # TODO add msg
         return
     # TODO check id
+    session = DBSession()
     for user_id in args:
         user = User(id=user_id, isadmin=True)
         session.merge(user)
     session.commit()
+    session.close()
     update_admin_list()
     bot.send_message(chat_id=update.message.chat_id, text=ADD_ADMIN_OK_MSG)
 
@@ -70,10 +72,12 @@ def run(bot, update):
     if group_info['status'] != ChatMember.ADMINISTRATOR:
         bot.send_message(chat_id=update.message.chat_id, text=BOT_NO_ADMIN_MSG)
         return
+    session = DBSession()
     group_link = bot.export_chat_invite_link(chat_id=update.message.chat_id)
     group = Group(id=update.message.chat_id, title=update.message.chat.title, link=group_link)
     session.merge(group)
     session.commit()
+    session.close()
     bot.send_message(chat_id=update.message.chat_id, text=BOT_IS_ADMIN_MSG)
     return RUN
 
@@ -150,6 +154,7 @@ def get_groups(bot, update):
     :type update: Update
     :return:
     """
+    session = DBSession()
     groups = session.query(Group).all()
     ret_text = ""
     for group in groups:
@@ -258,6 +263,7 @@ def globalban_list(bot, update):
     :type update: Update
     :return:
     """
+    session = DBSession()
     datas = session.query(User).filter_by(isban=True).all()
     ret_text = ""
     for data in datas:
@@ -473,6 +479,8 @@ def save(bot, update):
 
 
 def ban_user(user_list, ban=True):
+    session = DBSession()
     for user_data in user_list:
         session.merge(User(id=user_data.id, isban=ban, username=user_data.username))
     session.commit()
+    session.close()
