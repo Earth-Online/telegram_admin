@@ -12,6 +12,7 @@ admin_list = []
 
 
 def update_admin_list():
+    logging.debug('update admin list ing')
     session = DBSession()
     db_admin = session.query(User.id).all()
     global admin_list

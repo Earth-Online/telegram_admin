@@ -4,14 +4,21 @@
 run bot
 """
 import logging
+from logging import FileHandler
 from telegram.ext import Updater
-from config import LOG_LEVEL, TOKEN
+from config import LOG_LEVEL, TOKEN, LOG_FILE
 from handler import command_handler, messgae_handler, set_handler
 from admin import update_admin_list
 
+f_handler = FileHandler(LOG_FILE)
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=LOG_LEVEL)
+    level=LOG_LEVEL,
+    handlers=f_handler
+)
+
+logger_telegram = logging.getLogger('telegram')
+logger_telegram.setLevel(level=Warning)
 
 
 def main():
@@ -25,7 +32,7 @@ def main():
         dispatcher.add_handler(command)
     dispatcher.add_handler(set_handler)
     dispatcher.add_handler(messgae_handler)
-    logging.debug('update admin list ing')
+
     update_admin_list()
     logging.info('run bot')
     updater.start_polling()

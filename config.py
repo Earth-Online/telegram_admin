@@ -9,6 +9,7 @@ import os
 
 LOG_LEVEL = logging.DEBUG
 
+LOG_FILE = "./data/bot.log"
 # bot token
 TOKEN = os.environ.get('token') or ''
 
