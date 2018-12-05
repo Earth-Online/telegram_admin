@@ -9,7 +9,7 @@ from functools import wraps
 from telegram.ext import CommandHandler, MessageHandler, ConversationHandler
 from telegram.ext.dispatcher import DEFAULT_GROUP
 from telegram.utils.promise import Promise
-from constant import RUN
+from constant import RUN, BAN_STATE
 from admin import user_is_admin
 from telegram.ext import Dispatcher
 from re import compile
@@ -74,7 +74,7 @@ def check_admin(admin=True):
 def check_ban_state(chat_id, key):
     dispatcher = Dispatcher.get_instance()
     chat_data = dispatcher.chat_data[chat_id]
-    ban_state = chat_data.get('ban_state', dict())
+    ban_state = chat_data.get(BAN_STATE, dict())
     return bool(ban_state.get(key, False))
 
 

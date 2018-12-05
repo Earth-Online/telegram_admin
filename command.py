@@ -3,6 +3,7 @@
 """
 bot command
 """
+from datetime import datetime
 import pickle
 
 from telegram import Update, Bot, MessageEntity
@@ -10,12 +11,12 @@ from telegram import User as tg_user
 from telegram.ext import Dispatcher, ConversationHandler
 from telegram.chatmember import ChatMember
 from telegram import ParseMode
-
+from telegram import ForceReply
 from config import CHAT_DATA_FILE, USER_DATA_FILE, CONV_DATA_FILE
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
     BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG, BANWORD_KEY, \
-    LANGDATA_KEY
+    LANGDATA_KEY, TIME_END, BAN_STATE, START_TIME_MSG, STOP_TIME_MSG, AUTO_LOOK_START
 from telegram.ext.dispatcher import run_async
 from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data, kick_user
 from admin import update_admin_list, update_ban_list
@@ -122,7 +123,6 @@ def get_id(bot, update):
                                         group_id=update.message.chat_id
                                         )
                      )
-
 
 
 @command_wrap()
@@ -354,7 +354,7 @@ def settings(bot, update, chat_data):
     :return:
     """
     ret_text = ""
-    limit = chat_data.get("ban_state", {})
+    limit = chat_data.get(BAN_STATE, {})
     for setting in allow_setting:
         ret_text = ret_text + f"{setting}" + (NO if limit.get(setting) else OK) + "\n"
     bot.send_message(chat_id=update.message.chat_id, text=ret_text)
@@ -377,9 +377,9 @@ def banword(bot, update, args, chat_data):
     if not len(args):
         bot.send_message(chat_id=update.message.chat_id, text=BANWORD_ERROR)
         return
-    group_banwords = chat_data.get(BanMessageType.WORD, [])
+    group_banwords = chat_data.get(BanMessageType.BANWORD, [])
     group_banwords.extend(args)
-    chat_data[BanMessageType.WORD] = group_banwords
+    chat_data[BanMessageType.BANWORD] = group_banwords
     chat_data[BANWORD_KEY] = word_re(group_banwords)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
@@ -401,13 +401,13 @@ def unbanword(bot, update, args, chat_data):
     if not len(args):
         bot.send_message(chat_id=update.message.chat_id, text=BANWORD_ERROR)
         return
-    group_banwords = chat_data.get(BanMessageType.WORD, [])
+    group_banwords = chat_data.get(BanMessageType.BANWORD, [])
     for arg in args:
         try:
             group_banwords.remove(arg)
         except ValueError:
             continue
-    chat_data[BanMessageType.WORD] = group_banwords
+    chat_data[BanMessageType.BANWORD] = group_banwords
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
     if not len(group_banwords):
         chat_data[BANWORD_KEY] = None
@@ -428,7 +428,7 @@ def banwords(bot, update, chat_data):
     :type update: Update
     :return:
     """
-    group_banwords = chat_data.get(BanMessageType.WORD, [])
+    group_banwords = chat_data.get(BanMessageType.BANWORD, [])
     ret_text = ""
     for group_banword in group_banwords:
         ret_text = ret_text + BANWORD_FORMAT.format(word=group_banword)
@@ -492,17 +492,124 @@ def kick(bot, update, args):
     :type update: Update
     :return:
     """
-    try:
-        user_list = [int(arg) for arg in args]
-    except ValueError:
-        bot.send_message(chat_id=update.message.chat_id, text="arg not user id")
-        return
+    kick_user_list = []
+    for _ in args:
+        if _.isdigit():
+            kick_user_list.append(int(_))
     if update.message.reply_to_message:
-        user_list.append(update.message.reply_to_message.from_user['id'])
-    ban_users = update.message.parse_entities(types=MessageEntity.MENTION)
-    user_list.extend([user['user']['id'] for user in ban_users.keys()])
-    kick_user(bot, update, user_list=user_list)
+        kick_user_list.append(update.message.reply_to_message.from_user['id'])
+    ban_users = update.message.parse_entities(types=MessageEntity.TEXT_MENTION)
+    kick_user_list.extend([user.user['id'] for user in ban_users.keys()])
+    kick_user(bot, update, user_list=kick_user_list)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+
+
+@command_wrap(pass_args=True, pass_chat_data=True)
+@check_admin()
+def lock(bot, update, args, chat_data):
+    """
+    :param args:
+    :param chat_data:
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    if not len(args) or not args[0].isdigit():
+        bot.send_message(chat_id=update.message.chat_id, text="need a seconds num arg")
+        return
+    chat_data[TIME_END] = datetime.now().timestamp() + int(args[0])
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+
+
+@command_wrap(pass_chat_data=True)
+@check_admin()
+def unlock(bot, update, chat_data):
+    """
+    :param chat_data:
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    chat_data[TIME_END] = None
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+
+
+START_TIME = 999
+STOP_TIME = 1000
+
+
+@command_wrap()
+@check_admin()
+def autolock(bot, update):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
+    return START_TIME
+
+
+@command_wrap()
+@check_admin()
+def cancel(bot, update):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    return ConversationHandler.END
+
+
+@check_admin()
+def lockstart(bot, update, chat_data):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    if not update.message.text:
+        update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
+        return START_TIME
+    try:
+        time = datetime.strftime(update.message.text)
+    except ValueError:
+        update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
+        return START_TIME
+    chat_data[AUTO_LOOK_START] = time
+    update.message.reply_text(text=STOP_TIME_MSG, reply_markup=ForceReply())
+    return STOP_TIME_MSG
+
+
+@check_admin()
+def lockstop(bot, update, chat_data):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    if not update.message.text:
+        update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
+        return STOP_TIME_MSG
+    try:
+        time = datetime.strftime(update.message.text)
+    except ValueError:
+        update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
+        return STOP_TIME_MSG
+    chat_data[AUTO_LOOK_START] = time
+    return ConversationHandler.END
 
 
 def save_data(_=None, __=None):

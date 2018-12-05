@@ -10,7 +10,7 @@ from tool import check_ban_state, get_chat_data, get_user_data
 from langdetect import detect, DetectorFactory
 from datetime import datetime
 from emoji import emoji_count
-from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, BANWORD_KEY, LANGDATA_KEY
+from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, BANWORD_KEY, LANGDATA_KEY, TIME_END
 from admin import user_is_admin, user_is_ban
 
 
@@ -132,3 +132,13 @@ class NewMember(BaseFilter):
         if not message.new_chat_members:
             return False
         return True
+
+
+class Lock(BaseFilter):
+    def filter(self, message):
+        if not check_ban_state(message.chat_id, TIME_END):
+            return False
+        time = get_chat_data(message.chat_id)[TIME_END]
+        if message.date < time:
+            return True
+        return False

@@ -5,7 +5,7 @@ handle massage
 """
 import filter
 from admin import user_is_ban
-from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType, RUN
+from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType, RUN, BAN_STATE
 from telegram import Update, Bot
 from telegram.ext.dispatcher import run_async
 from tool import messaage_warp, check_admin, kick_user
@@ -14,7 +14,7 @@ from telegram.ext.filters import Filters
 
 @messaage_warp(filters=(filter.TelegramLink() | filter.Lang() | filter.Flood() |
                         filter.Emoji() | filter.Gif() | filter.Numbers()
-                        | filter.BanWord()), pass_chat_data=True,
+                        | filter.BanWord() | filter.Lock()), pass_chat_data=True,
                pass_user_data=True)
 @run_async
 def telegram_link_handler(bot, update, user_data, chat_data):
@@ -47,7 +47,7 @@ def common_message_handler(bot, update, user_data, chat_data):
     :type user_data:dict
     :return:
     """
-    ban_state = chat_data.get('ban_state', {})
+    ban_state = chat_data.get(BAN_STATE, {})
     for ban_type in ban_state.keys():
         if getattr(update.message, ban_type, False):
             update.message.delete()
@@ -109,7 +109,7 @@ def warn_user(bot, update, user_data, chat_data):
     :type user_data: dict
     :return:
     """
-    if chat_data.get("ban_state", {}).get(BanMessageType.WARN) is False:
+    if chat_data.get(BAN_STATE, {}).get(BanMessageType.WARN) is False:
         bot.send_message(chat_id=update.message.chat_id, text=WARN_MSG)
         user_data['warn'] = user_data.get('warn', 0) + 1
         if chat_data.get('maxwarn'):

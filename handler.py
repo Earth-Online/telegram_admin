@@ -6,10 +6,11 @@ get some handler
 import logging
 from command import (start, run, add_admin, clearwarns, get_id, admins, get_groups, link, stop, info,
                      globalban, unglobalban, globalban_list, maxwarns, settimeflood, setflood, settings,
-                     banword, unbanword, banwords, save, lang, save_data, kick
+                     banword, unbanword, banwords, save, lang, save_data, kick, lock, unlock, autolock,
+                     cancel, START_TIME, STOP_TIME, lockstart, lockstop
                      )
 
-from telegram.ext import ConversationHandler, RegexHandler
+from telegram.ext import ConversationHandler, RegexHandler, MessageHandler
 from message import common_message_handler, telegram_link_handler, limit_set
 from constant import RUN, STOP, SETTING_RE
 
@@ -40,10 +41,25 @@ admin_handler = [
     lang,
     clearwarns,
     kick,
+    lock,
+    unlock,
     set_handler,
     telegram_link_handler,
     common_message_handler,
 ]
+
+auto_lock_handler = ConversationHandler(
+    entry_points=[autolock],
+    states={
+        START_TIME: {
+            MessageHandler(callback=lockstart)
+        },
+        STOP_TIME: {
+            MessageHandler(callback=lockstop)
+        }
+    },
+    fallbacks=[cancel]
+)
 
 messgae_handler = ConversationHandler(
     entry_points=[run],

@@ -47,6 +47,9 @@ BANWORD_FORMAT = """• {word}\n"""
 NO_GET_USENAME_MSG = """Warning: Due to api restrictions, usernames cannot be obtained from user_id.The user name of 
 this user will not be included in the added data. """
 
+START_TIME_MSG = "send lock group time format example 01:00"
+STOP_TIME_MSG = "send open group time  format example 02:00"
+
 GLOBAL_BAN_FORMAT = """[{user_id}](tg://user?id={user_id})\n"""
 ADMIN_FORMAT = """- [{username}](tg://user?id={user_id})\n"""
 GROUP_FORMAT = "{group_title} |{group_id}| [GroupLink]({group_link})\n"
@@ -88,7 +91,6 @@ class BanMessageType:
     EMOJI = "emoji"
     HASHTAG = "hashtag"
     MENTION = "mention"
-    INLINE = "inline"
     WARN = "warn"
     BANWORD = "banword"
     URL = "url"
@@ -125,3 +127,7 @@ NUM_RE = re.compile(r"\d")
 
 BANWORD_KEY = "banwordre"
 LANGDATA_KEY = "lang_data"
+TIME_END = "timeend"
+BAN_STATE = "ban_state"
+AUTO_LOOK_START = "look_start"
+AUTO_LOOK_STOP = "look_stop"
