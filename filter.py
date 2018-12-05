@@ -7,10 +7,10 @@ from telegram.ext.filters import BaseFilter
 from telegram.messageentity import MessageEntity
 from urllib.parse import urlparse
 from tool import check_ban_state, get_chat_data, get_user_data
-from langdetect import detect
+from langdetect import detect, DetectorFactory
 from datetime import datetime
 from emoji import emoji_count
-from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, BANWORD_KEY
+from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, BANWORD_KEY, LANGDATA_KEY
 from admin import user_is_admin, user_is_ban
 
 
@@ -34,10 +34,17 @@ class TelegramLink(BaseFilter):
 class Lang(BaseFilter):
     def filter(self, message):
         chat_data: dict = get_chat_data(chat_id=message.chat_id)
-        ban_list = chat_data.get(BanMessageType.LANG, False)
-        if not ban_list:
+        if not chat_data.get(BanMessageType.LANG):
             return False
-        return detect(message.text) in ban_list
+
+        ban_list = chat_data.get(LANGDATA_KEY, [])
+        if not len(ban_list):
+            return False
+        try:
+            ret = detect(message.text) in ban_list
+        except DetectorFactory:
+            return False
+        return ret
 
 
 class Flood(BaseFilter):

@@ -14,7 +14,8 @@ from telegram import ParseMode
 from config import CHAT_DATA_FILE, USER_DATA_FILE, CONV_DATA_FILE
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
-    BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG, BANWORD_KEY
+    BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG, BANWORD_KEY, \
+    LANGDATA_KEY
 from telegram.ext.dispatcher import run_async
 from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data, kick_user
 from admin import update_admin_list, update_ban_list
@@ -43,11 +44,13 @@ def add_admin(bot, update, args):
     :return:
     """
     if not len(args):
-        # TODO add msg
+        bot.send_message(chat_id=update.message.chat_id, text="error command")
         return
-    # TODO check id
     session = DBSession()
     for user_id in args:
+        if not user_id.isdigit():
+            bot.send_message(chat_id=update.message.chat_id, text="error id")
+            return
         user = User(id=user_id, isadmin=True)
         session.merge(user)
     session.commit()
@@ -119,6 +122,7 @@ def get_id(bot, update):
                                         group_id=update.message.chat_id
                                         )
                      )
+
 
 
 @command_wrap()
@@ -221,12 +225,10 @@ def globalban(bot, update, args):
     :return:
     """
     ban_user_list = []
-    if len(args):
-        bot.send_message(chat_id=update.message.chat_id, text=NO_GET_USENAME_MSG)
     for _ in args:
         if _.isdigit():
             ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
-    for entity in update.message.parse_entities(MessageEntity.MENTION).keys():
+    for entity in update.message.parse_entities(MessageEntity.TEXT_MENTION).keys():
         ban_user_list.append(entity.user)
     ban_user(user_list=ban_user_list, ban=True)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
@@ -245,12 +247,10 @@ def unglobalban(bot, update, args):
     :return:
     """
     ban_user_list = []
-    if len(args):
-        bot.send_message(chat_id=update.message.chat_id, text=NO_GET_USENAME_MSG)
     for _ in args:
         if _.isdigit():
-            ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
-    for entity in update.message.parse_entities(MessageEntity.MENTION).keys():
+            ban_user_list.append(tg_user(id=_, username="not get", is_bot=False))
+    for entity in update.message.parse_entities(MessageEntity.TEXT_MENTION).keys():
         ban_user_list.append(entity.user)
     ban_user(user_list=ban_user_list, ban=False)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
@@ -272,7 +272,7 @@ def globalban_list(bot, update):
     datas = session.query(User).filter_by(isban=True).all()
     ret_text = ""
     for data in datas:
-        ret_text = ret_text + GLOBAL_BAN_FORMAT.format(user_name=data.username, user_id=data.id)
+        ret_text = ret_text + GLOBAL_BAN_FORMAT.format(user_name=data.id, user_id=data.id)
     session.close()
     if ret_text == "":
         bot.send_message(chat_id=update.message.chat_id, text="not have some globalban")
@@ -453,7 +453,7 @@ def lang(bot, update, args, chat_data):
     if len(args) < 2:
         bot.send_message(chat_id=update.message.chat_id, text=BANWORD_ERROR)
         return
-    ban_list: list = chat_data.get(BanMessageType.LANG, [])
+    ban_list: list = chat_data.get(LANGDATA_KEY, [])
     if args[1] == "off":
         ban_list.append(args[0])
         chat_data[BanMessageType.LANG] = ban_list

@@ -13,7 +13,7 @@ from telegram.ext.filters import Filters
 
 
 @messaage_warp(filters=(filter.TelegramLink() | filter.Lang() | filter.Flood() |
-                        filter.Lang() | filter.Emoji() | filter.Gif() | filter.Numbers()
+                        filter.Emoji() | filter.Gif() | filter.Numbers()
                         | filter.BanWord()), pass_chat_data=True,
                pass_user_data=True)
 @run_async
