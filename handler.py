@@ -23,12 +23,13 @@ command_handler = [
     admins,
     get_groups,
     info,
-]
-
-admin_handler = [
     globalban_list,
     globalban,
     unglobalban,
+    save
+]
+
+admin_handler = [
     link,
     maxwarns,
     banword,
@@ -37,7 +38,6 @@ admin_handler = [
     settings,
     settimeflood,
     banwords,
-    save,
     lang,
     clearwarns,
     kick,

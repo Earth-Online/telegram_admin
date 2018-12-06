@@ -17,7 +17,8 @@ from config import CHAT_DATA_FILE, USER_DATA_FILE, CONV_DATA_FILE
 from constant import START_MSG, ADD_ADMIN_OK_MSG, RUN, ADMIN, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, STOP, INFO_MSG, GLOBAL_BAN_FORMAT, NO_GET_USENAME_MSG, MAXWARNS_ERROR, \
     BanMessageType, allow_setting, OK, NO, BANWORD_ERROR, BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG, BANWORD_KEY, \
-    LANGDATA_KEY, TIME_END, BAN_STATE, START_TIME_MSG, STOP_TIME_MSG, AUTO_LOOK_START, AUTO_LOOK_STOP
+    LANGDATA_KEY, TIME_END, BAN_STATE, START_TIME_MSG, STOP_TIME_MSG, AUTO_LOOK_START, AUTO_LOOK_STOP, UserData, \
+    ARG_ERROR_MSG, USERID_ERROR_MSG, RunState, NO_INFO_MSG, NUM_ERROR, ChatData, OpenState, OPITON_ERROR
 from telegram.ext.dispatcher import run_async
 from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data, kick_user, \
     messaage_warp
@@ -47,12 +48,12 @@ def add_admin(bot, update, args):
     :return:
     """
     if not len(args):
-        bot.send_message(chat_id=update.message.chat_id, text="error command")
+        bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
         return
     session = DBSession()
     for user_id in args:
         if not user_id.isdigit():
-            bot.send_message(chat_id=update.message.chat_id, text="error id")
+            bot.send_message(chat_id=update.message.chat_id, text=USERID_ERROR_MSG)
             return
         user = User(id=user_id, isadmin=True)
         session.merge(user)
@@ -62,11 +63,11 @@ def add_admin(bot, update, args):
     bot.send_message(chat_id=update.message.chat_id, text=ADD_ADMIN_OK_MSG)
 
 
-@command_wrap()
+@command_wrap(state=RunState.RUN)
 @check_admin()
 @run_async
 def run(bot, update):
-    """
+    """Run bot filter function
     :param bot:
     :type bot: Bot
     :param update:
@@ -85,29 +86,34 @@ def run(bot, update):
     session.commit()
     session.close()
     bot.send_message(chat_id=update.message.chat_id, text=BOT_IS_ADMIN_MSG)
-    return RUN
 
 
-@command_wrap(pass_args=True)
+@command_wrap(pass_args=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def clearwarns(bot, update, args):
-    try:
-        user_list = [int(arg) for arg in args]
-    except ValueError:
-        bot.send_message(chat_id=update.message.chat_id, text="arg not user id")
-        return
+    """
+    clearn a user warn
+    :param bot:
+    :param update:
+    :param args:
+    :type bot: Bot
+    :type update: Update
+    :return:
+    """
+    user_list = []
+    for _ in args:
+        if _.isdigit():
+            user_list.append(tg_user(id=_, first_name="temp", is_bot=False))
     if update.message.reply_to_message:
         user_list.append(update.message.reply_to_message.from_user['id'])
     if update.message.entities:
         for entity in update.message.entities:
-            if entity.type == MessageEntity.MENTION:
+            if entity.type == MessageEntity.TEXT_MENTION:
                 user_list.append(entity.user['id'])
-
-    dispatcher = Dispatcher.get_instance()
-    user_data = dispatcher.user_data
+    user_data = get_user_data()
     for user in user_list:
-        user_data[user]['warn'] = 0
+        user_data[user][UserData.WARN] = 0
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
@@ -115,7 +121,7 @@ def clearwarns(bot, update, args):
 @run_async
 def get_id(bot, update):
     """
-
+    get user id
     :param bot:
     :param update:
     :return:
@@ -131,7 +137,7 @@ def get_id(bot, update):
 @run_async
 def admins(bot, update):
     """
-
+    get group admin info
     :param bot:
     :type bot: Bot
     :param update:
@@ -175,6 +181,7 @@ def get_groups(bot, update):
 @run_async
 def stop(bot, update):
     """
+    Stop bot filer function
     :param bot:
     :type bot: Bot
     :param update:
@@ -185,11 +192,12 @@ def stop(bot, update):
     # return ConversationHandler.END
 
 
-@command_wrap()
+@command_wrap(state=RunState.RUN)
 @check_admin()
 @run_async
 def link(bot, update):
     """
+
     :param bot:
     :type bot: Bot
     :param update:
@@ -220,6 +228,7 @@ def info(bot, update):
 @run_async
 def globalban(bot, update, args):
     """
+    globalban a user
     :param bot:
     :type bot: Bot
     :param update:
@@ -232,6 +241,9 @@ def globalban(bot, update, args):
             ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
     for entity in update.message.parse_entities(MessageEntity.TEXT_MENTION).keys():
         ban_user_list.append(entity.user)
+    if not len(ban_user_list):
+        bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
+        return
     ban_user(user_list=ban_user_list, ban=True)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
     update_ban_list()
@@ -242,6 +254,7 @@ def globalban(bot, update, args):
 @run_async
 def unglobalban(bot, update, args):
     """
+    cancel a user globalbanr
     :param bot:
     :type bot: Bot
     :param update:
@@ -254,6 +267,9 @@ def unglobalban(bot, update, args):
             ban_user_list.append(tg_user(id=_, first_name="not get", username="not get", is_bot=False))
     for entity in update.message.parse_entities(MessageEntity.TEXT_MENTION).keys():
         ban_user_list.append(entity.user)
+    if not len(ban_user_list):
+        bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
+        return
     ban_user(user_list=ban_user_list, ban=False)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
     update_ban_list()
@@ -264,6 +280,7 @@ def unglobalban(bot, update, args):
 @run_async
 def globalban_list(bot, update):
     """
+    show globalban user list
     :param bot:
     :type bot: Bot
     :param update:
@@ -277,35 +294,41 @@ def globalban_list(bot, update):
         ret_text = ret_text + GLOBAL_BAN_FORMAT.format(user_name=data.id, user_id=data.id)
     session.close()
     if ret_text == "":
-        bot.send_message(chat_id=update.message.chat_id, text="not have some globalban")
+        bot.send_message(chat_id=update.message.chat_id, text=NO_INFO_MSG)
         return
     bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True)
+@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def maxwarns(bot, update, args, chat_data):
     """
+    set maxwarn num
     :param args:
     :param chat_data:
     :param bot:
     :type bot: Bot
     :param update:
     :type update: Update
+    :type chat_data: dict
     :return:
     """
-    if len(args) == 0 or not args[0].isdigit():
-        bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
-    chat_data['maxwarn'] = int(args[0])
+    if len(args) == 0 and chat_data.get(ChatData.MAXWARN):
+        chat_data.pop(ChatData.MAXWARN)
+        return
+    if not args[0].isdigit():
+        bot.send_message(update.message.chat_id, text=NUM_ERROR)
+    chat_data[ChatData.MAXWARN] = int(args[0])
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True)
+@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def settimeflood(bot, update, args, chat_data):
     """
+    set flood limit time
     :param args:
     :param chat_data:
     :param bot:
@@ -314,15 +337,16 @@ def settimeflood(bot, update, args, chat_data):
     :type update: Update
     :return:
     """
-    if len(args) == 0 or not args[0].isdigit():
-        bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
-    data = chat_data.get(BanMessageType.FLOOD, {})
-    data['time'] = int(args[0])
-    chat_data[BanMessageType.FLOOD] = data
+    if len(args) == 0 and chat_data.get(ChatData.FLOOD_TIME):
+        chat_data.pop(ChatData.FLOOD_TIME)
+        return
+    if not args[0].isdigit():
+        bot.send_message(update.message.chat_id, text=NUM_ERROR)
+    chat_data[ChatData.FLOOD_TIME] = int(args[0])
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True)
+@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def setflood(bot, update, args, chat_data):
@@ -335,19 +359,21 @@ def setflood(bot, update, args, chat_data):
     :type update: Update
     :return:
     """
-    if len(args) == 0 or not args[0].isdigit():
-        bot.send_message(update.message.chat_id, text=MAXWARNS_ERROR)
-    data = chat_data.get(BanMessageType.FLOOD, {})
-    data['num'] = int(args[0])
-    chat_data[BanMessageType.FLOOD] = data
+    if len(args) == 0 and chat_data.get(ChatData.FLOOD_NUM):
+        chat_data.pop(ChatData.FLOOD_NUM)
+        return
+    if not args[0].isdigit():
+        bot.send_message(update.message.chat_id, text=NUM_ERROR)
+    chat_data[ChatData.FLOOD_NUM] = int(args[0])
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True)
+@command_wrap(pass_chat_data=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def settings(bot, update, chat_data):
     """
+    show group limit setting
     :param chat_data:
     :param bot:
     :type bot: Bot
@@ -362,11 +388,12 @@ def settings(bot, update, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True)
+@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def banword(bot, update, args, chat_data):
     """
+    set banword
     :param chat_data:
     :type chat_data: dict
     :param args:
@@ -379,18 +406,19 @@ def banword(bot, update, args, chat_data):
     if not len(args):
         bot.send_message(chat_id=update.message.chat_id, text=BANWORD_ERROR)
         return
-    group_banwords = chat_data.get(BanMessageType.BANWORD, [])
+    group_banwords = chat_data.get(ChatData.BANWORD, [])
     group_banwords.extend(args)
-    chat_data[BanMessageType.BANWORD] = group_banwords
-    chat_data[BANWORD_KEY] = word_re(group_banwords)
+    chat_data[ChatData.BANWORD] = group_banwords
+    chat_data[ChatData.BANWORD_RE] = word_re(group_banwords)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True)
+@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def unbanword(bot, update, args, chat_data):
     """
+    cancel banword
     :param chat_data:
     :type chat_data: dict
     :param args:
@@ -403,25 +431,26 @@ def unbanword(bot, update, args, chat_data):
     if not len(args):
         bot.send_message(chat_id=update.message.chat_id, text=BANWORD_ERROR)
         return
-    group_banwords = chat_data.get(BanMessageType.BANWORD, [])
+    group_banwords = chat_data.get(ChatData.BANWORD, [])
     for arg in args:
         try:
             group_banwords.remove(arg)
         except ValueError:
             continue
-    chat_data[BanMessageType.BANWORD] = group_banwords
+    chat_data[ChatData.BANWORD] = group_banwords
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
     if not len(group_banwords):
-        chat_data[BANWORD_KEY] = None
+        chat_data[ChatData.BANWORD_RE] = None
         return
-    chat_data[BANWORD_KEY] = word_re(group_banwords)
+    chat_data[ChatData.BANWORD_RE] = word_re(group_banwords)
 
 
-@command_wrap(pass_chat_data=True)
+@command_wrap(pass_chat_data=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def banwords(bot, update, chat_data):
     """
+    show banword list
     :param chat_data:
     :type chat_data: dict
     :param bot:
@@ -430,7 +459,7 @@ def banwords(bot, update, chat_data):
     :type update: Update
     :return:
     """
-    group_banwords = chat_data.get(BanMessageType.BANWORD, [])
+    group_banwords = chat_data.get(ChatData.BANWORD, [])
     ret_text = ""
     for group_banword in group_banwords:
         ret_text = ret_text + BANWORD_FORMAT.format(word=group_banword)
@@ -438,11 +467,12 @@ def banwords(bot, update, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True)
+@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def lang(bot, update, args, chat_data):
     """
+    set lang limit
     :param chat_data:
     :param args:
     :param args:
@@ -455,15 +485,17 @@ def lang(bot, update, args, chat_data):
     if len(args) < 2:
         bot.send_message(chat_id=update.message.chat_id, text=BANWORD_ERROR)
         return
-    ban_list: list = chat_data.get(LANGDATA_KEY, [])
-    if args[1] == "off":
+    ban_list: list = chat_data.get(ChatData.LANG, [])
+    if args[1] == OpenState.CLODE:
         ban_list.append(args[0])
-        chat_data[BanMessageType.LANG] = ban_list
-    elif args[1] == "on":
-        try:
+        chat_data[ChatData.LANG] = ban_list
+    elif args[1] == OpenState.OPEN:
+        if args in ban_list:
             ban_list.remove(args[0])
-        except ValueError:
-            pass
+        chat_data[ChatData.LANG] = ban_list
+    else:
+        bot.send_message(chat_id=update.message.chat_id, text=OPITON_ERROR)
+        return
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
@@ -472,6 +504,7 @@ def lang(bot, update, args, chat_data):
 @run_async
 def save(bot, update):
     """
+    save cache data
     :param bot:
     :type bot: Bot
     :param update:
@@ -482,7 +515,7 @@ def save(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_args=True)
+@command_wrap(pass_args=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def kick(bot, update, args):
@@ -502,11 +535,14 @@ def kick(bot, update, args):
         kick_user_list.append(update.message.reply_to_message.from_user['id'])
     ban_users = update.message.parse_entities(types=MessageEntity.TEXT_MENTION)
     kick_user_list.extend([user.user['id'] for user in ban_users.keys()])
+    if not len(kick_user_list):
+        bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
+        return
     kick_user(bot, update, user_list=kick_user_list)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_args=True, pass_chat_data=True)
+@command_wrap(pass_args=True, pass_chat_data=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def lock(bot, update, args, chat_data):
@@ -520,13 +556,13 @@ def lock(bot, update, args, chat_data):
     :return:
     """
     if not len(args) or not args[0].isdigit():
-        bot.send_message(chat_id=update.message.chat_id, text="need a seconds num arg")
+        bot.send_message(chat_id=update.message.chat_id, text=NUM_ERROR)
         return
-    chat_data[TIME_END] = datetime.now().timestamp() + int(args[0])
+    chat_data[ChatData.LOCKTIME] = datetime.now().timestamp() + int(args[0])
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True)
+@command_wrap(pass_chat_data=True, state=RunState.RUN)
 @check_admin()
 @run_async
 def unlock(bot, update, chat_data):
@@ -538,7 +574,7 @@ def unlock(bot, update, chat_data):
     :type update: Update
     :return:
     """
-    chat_data[TIME_END] = None
+    chat_data[ChatData.LOCKTIME] = None
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
@@ -546,7 +582,7 @@ START_TIME = 999
 STOP_TIME = 1000
 
 
-@command_wrap(state=START_TIME)
+@command_wrap(state=RunState.START_TIME)
 @check_admin()
 def autolock(bot, update):
     """
@@ -557,6 +593,20 @@ def autolock(bot, update):
     :return:
     """
     update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
+
+
+@command_wrap(state=RunState.RUN, pass_chat_data=True)
+@check_admin()
+def unautolock(bot, update, chat_data):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    chat_data[ChatData.AUTO_LOOK_START] = None
+    chat_data[ChatData.AUTO_LOOK_STOP] = None
 
 
 @command_wrap(state=ConversationHandler.END)
@@ -590,7 +640,7 @@ def lockstart(bot, update, chat_data):
     except ValueError:
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
         return START_TIME
-    chat_data[AUTO_LOOK_START] = time
+    chat_data[ChatData.AUTO_LOOK_START] = time
     update.message.reply_text(text=STOP_TIME_MSG, reply_markup=ForceReply())
     return STOP_TIME
 
@@ -614,7 +664,7 @@ def lockstop(bot, update, chat_data):
     except ValueError:
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
         return STOP_TIME
-    chat_data[AUTO_LOOK_STOP] = time
+    chat_data[ChatData.AUTO_LOOK_STOP] = time
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
     return ConversationHandler.END
 

@@ -11,7 +11,7 @@ from langdetect import detect, DetectorFactory
 from datetime import datetime
 from emoji import emoji_count
 from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, BANWORD_KEY, LANGDATA_KEY, TIME_END, AUTO_LOOK_START, \
-    AUTO_LOOK_STOP
+    AUTO_LOOK_STOP, ChatData
 from admin import user_is_admin, user_is_ban
 
 
@@ -34,11 +34,10 @@ class TelegramLink(BaseFilter):
 
 class Lang(BaseFilter):
     def filter(self, message):
-        chat_data: dict = get_chat_data(chat_id=message.chat_id)
-        if not chat_data.get(BanMessageType.LANG):
+        if not check_ban_state(message.chat_id, BanMessageType.LANG):
             return False
-
-        ban_list = chat_data.get(LANGDATA_KEY, [])
+        chat_data: dict = get_chat_data(chat_id=message.chat_id)
+        ban_list = chat_data.get(ChatData.LANG, [])
         if not len(ban_list):
             return False
         try:
@@ -54,9 +53,8 @@ class Flood(BaseFilter):
         if not check_ban_state(message.chat_id, BanMessageType.FLOOD):
             return False
         chat_data: dict = get_chat_data(chat_id=message.chat_id)
-        flood_limit = chat_data.get(BanMessageType.FLOOD, {})
-        time = flood_limit.get("time")
-        num = flood_limit.get("num")
+        time = chat_data.get(ChatData.FLOOD_TIME)
+        num = chat_data.get(ChatData.FLOOD_NUM)
         if not time or not num:
             return
         now_time = datetime.now().timestamp()
@@ -112,13 +110,13 @@ class Numbers(BaseFilter):
 
 class BanWord(BaseFilter):
     def filter(self, message):
+        if not message.text:
+            return False
         if not check_ban_state(message.chat_id, BanMessageType.BANWORD):
             return False
         chat_data: dict = get_chat_data(chat_id=message.chat_id)
-        re = chat_data.get(BANWORD_KEY)
+        re = chat_data.get(ChatData.BANWORD_RE)
         if not re:
-            return False
-        if not message.text:
             return False
         return re.search(message.text)
 
@@ -137,7 +135,7 @@ class NewMember(BaseFilter):
 
 class Lock(BaseFilter):
     def filter(self, message):
-        time = get_chat_data(message.chat_id).get(TIME_END)
+        time = get_chat_data(message.chat_id).get(ChatData.LOCKTIME)
         if not time:
             return False
         if message.date.timestamp() < time:
@@ -148,8 +146,8 @@ class Lock(BaseFilter):
 class AutoLock(BaseFilter):
     def filter(self, message):
         chat_data = get_chat_data(message.chat_id)
-        time_start: datetime = chat_data.get(AUTO_LOOK_START)
-        time_stop: datetime = chat_data.get(AUTO_LOOK_STOP)
+        time_start: datetime = chat_data.get(ChatData.AUTO_LOOK_START)
+        time_stop: datetime = chat_data.get(ChatData.AUTO_LOOK_STOP)
         if not time_start or not time_stop:
             return False
         if message.date.hour < time_start.hour or message.date.hour > time_stop.hour:

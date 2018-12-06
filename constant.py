@@ -5,17 +5,28 @@ send msg constar
 """
 import re
 
+# send msf
 START_MSG = "bot run ok"
 
 ADD_ADMIN_OK_MSG = "add ok"
 
 SET_OK_MSG = "setting ok"
 
+ARG_ERROR_MSG = "arg error"
+
+USERID_ERROR_MSG = "error user id"
+
 BOT_NO_ADMIN_MSG = "I SHOULD BE ADMIN IN THE GROUP"
 
 BOT_IS_ADMIN_MSG = "✅ Done Active The Group"
 
 BOT_STOP_MSG = "bot stop"
+
+NO_INFO_MSG = "not have some info"
+
+NUM_ERROR = "not a effective number"
+
+OPITON_ERROR = "error option"
 
 INFO_MSG = """
 🔸 USER NAME : {username}
@@ -63,6 +74,18 @@ MAXWARNS_ERROR = "command error.command usage: /maxwarns <num>"
 BANWORD_ERROR = "command error.command usage: /banword <banword>"
 
 
+class OpenState:
+    OPEN = "on"
+    CLODE = "off"
+
+
+class RunState:
+    RUN = 1
+    STOP = 0
+    START_TIME = 999
+    STOP_TIME = 1000
+
+
 class BanMessageType:
     VIDEO = 'video'
     PHOTO = 'photo'
@@ -96,6 +119,23 @@ class BanMessageType:
     URL = "url"
     VIDEONOTE = "videonote"
     LINK = "link"
+
+
+class UserData:
+    WARN = "warn"
+
+
+class ChatData:
+    MAXWARN = "maxwarn"
+    FLOOD_TIME = "time"
+    FLOOD_NUM = "flood_num"
+    BANWORD = "banword"
+    BANWORD_RE = "banword_re"
+    LANG = "lang"
+    LOCKTIME = "locktime"
+    BANSTATE = "ban_state"
+    AUTO_LOOK_START = "look_start"
+    AUTO_LOOK_STOP = "look_stop"
 
 
 LIMIT_DICT = {
