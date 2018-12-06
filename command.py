@@ -3,6 +3,7 @@
 """
 bot command
 """
+import logging
 import pickle
 from datetime import datetime
 
@@ -698,6 +699,7 @@ def lockstop(bot, update, chat_data):
 
 
 def save_data(_=None, __=None):
+
     user_data = get_user_data()
     chat_data = get_chat_data()
     conv_data = get_conv_data()
@@ -707,6 +709,7 @@ def save_data(_=None, __=None):
         pickle.dump(user_data, f)
     with open(CONV_DATA_FILE, 'wb+') as f:
         pickle.dump(conv_data, f)
+    logging.info("save data ok")
 
 
 def ban_user(user_list, ban=True):
