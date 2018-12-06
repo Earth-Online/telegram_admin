@@ -12,9 +12,11 @@ from tool import messaage_warp, check_admin, kick_user
 from telegram.ext.filters import Filters
 
 
-@messaage_warp(filters=(filter.TelegramLink() | filter.Lang() | filter.Flood() |
-                        filter.Emoji() | filter.Gif() | filter.Numbers()
-                        | filter.BanWord() | filter.Lock() | filter.AutoLock()), pass_chat_data=True,
+@messaage_warp(filters=Filters.group & ~filter.Admin() & ~filter.GroupAdmin() & (
+        filter.TelegramLink() | filter.Lang() | filter.Flood() |
+        filter.Emoji() | filter.Gif() | filter.Numbers()
+        | filter.BanWord() | filter.Lock() | filter.AutoLock()),
+               pass_chat_data=True,
                pass_user_data=True)
 @run_async
 def telegram_link_handler(bot, update, user_data, chat_data):
@@ -32,7 +34,7 @@ def telegram_link_handler(bot, update, user_data, chat_data):
     return RUN
 
 
-@messaage_warp(filters=(Filters.all & ~filter.Admin()),
+@messaage_warp(filters=(Filters.group & Filters.all & ~filter.Admin() & ~filter.GroupAdmin()),
                pass_chat_data=True, pass_user_data=True)
 @run_async
 def common_message_handler(bot, update, user_data, chat_data):

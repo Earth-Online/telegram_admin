@@ -11,7 +11,7 @@ from command import (start, run, add_admin, clearwarns, get_id, admins, get_grou
                      )
 
 from telegram.ext import ConversationHandler, RegexHandler, MessageHandler
-from message import common_message_handler, telegram_link_handler, limit_set
+from message import common_message_handler, telegram_link_handler, limit_set, new_member
 from constant import RUN, STOP, SETTING_RE
 
 set_handler = RegexHandler(callback=limit_set, pattern=SETTING_RE, pass_chat_data=True, pass_groups=True)
@@ -45,6 +45,7 @@ admin_handler = [
     unlock,
     set_handler,
     telegram_link_handler,
+    new_member,
     common_message_handler,
 ]
 

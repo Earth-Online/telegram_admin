@@ -3,16 +3,17 @@
 """
 docs
 """
+from datetime import datetime
+from urllib.parse import urlparse
+
+from emoji import emoji_count
+from langdetect import detect, DetectorFactory
 from telegram.ext.filters import BaseFilter
 from telegram.messageentity import MessageEntity
-from urllib.parse import urlparse
+
+from admin import user_is_admin, get_groupadmin
+from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, ChatData, UserData
 from tool import check_ban_state, get_chat_data, get_user_data
-from langdetect import detect, DetectorFactory
-from datetime import datetime
-from emoji import emoji_count
-from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, BANWORD_KEY, LANGDATA_KEY, TIME_END, AUTO_LOOK_START, \
-    AUTO_LOOK_STOP, ChatData
-from admin import user_is_admin, user_is_ban
 
 
 class TelegramLink(BaseFilter):
@@ -22,12 +23,18 @@ class TelegramLink(BaseFilter):
         urls = message.parse_entities(types=MessageEntity.URL)
         if len(urls):
             for url in urls.values():
-                if urlparse(url).netloc in TELEGRAM_DOMAIN:
+                send_url = urlparse(url)
+                if not send_url.scheme:
+                    send_url = urlparse("//" + url)
+                if send_url.netloc in TELEGRAM_DOMAIN:
                     return True
         urls = message.parse_entities(types=MessageEntity.TEXT_LINK)
         if len(urls):
             for url in urls.keys():
-                if urlparse(url.url).netloc in TELEGRAM_DOMAIN:
+                send_url = urlparse(url.url)
+                if not send_url.scheme:
+                    send_url = urlparse("//" + url.url)
+                if send_url.netloc in TELEGRAM_DOMAIN:
                     return True
         return False
 
@@ -60,7 +67,7 @@ class Flood(BaseFilter):
         now_time = datetime.now().timestamp()
 
         user_data = get_user_data(message.from_user.id)
-        msg_data = user_data.get("msg_data", [])
+        msg_data = user_data.get(UserData.MSG_DATA, [])
         if len(msg_data) < num:
             msg_data.append(now_time)
             user_data["msg_data"] = msg_data
@@ -72,16 +79,16 @@ class Flood(BaseFilter):
             return False
         msg_data = filter(lambda x: x > liimt_time, msg_data)
         if len(list(msg_data)) < num:
-            user_data["msg_data"] = msg_data
+            user_data["msg_data"] = list(msg_data)
             return False
         return True
 
 
 class Gif(BaseFilter):
     def filter(self, message):
-        if not check_ban_state(message.chat_id, BanMessageType.GIF):
-            return False
         if not message.document:
+            return False
+        if not check_ban_state(message.chat_id, BanMessageType.GIF):
             return False
         if message['document']['file_name'][-7:] == "gif.mp4":
             return True
@@ -90,9 +97,9 @@ class Gif(BaseFilter):
 
 class Emoji(BaseFilter):
     def filter(self, message):
-        if not check_ban_state(message.chat_id, BanMessageType.EMOJI):
-            return False
         if not message.text:
+            return False
+        if not check_ban_state(message.chat_id, BanMessageType.EMOJI):
             return False
         if emoji_count(message.text):
             return True
@@ -132,7 +139,6 @@ class NewMember(BaseFilter):
             return False
         return True
 
-
 class Lock(BaseFilter):
     def filter(self, message):
         time = get_chat_data(message.chat_id).get(ChatData.LOCKTIME)
@@ -159,3 +165,8 @@ class AutoLock(BaseFilter):
         if message.date.hour == time_stop.hour and message.date.minute < time_stop.minute:
             return True
         return False
+
+
+class GroupAdmin(BaseFilter):
+    def filter(self, message):
+        return message.from_user['id'] in get_groupadmin(message.chat_id)

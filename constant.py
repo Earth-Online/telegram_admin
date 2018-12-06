@@ -123,7 +123,7 @@ class BanMessageType:
 
 class UserData:
     WARN = "warn"
-
+    MSG_DATA = "msg_data"
 
 class ChatData:
     MAXWARN = "maxwarn"

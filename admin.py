@@ -4,9 +4,13 @@
 admin check and cache
 """
 import logging
+
+from telegram import Bot
 from config import ADMIN
 from module import DBSession
 from module.user import User
+from mwt import MWT
+from config import TOKEN
 
 admin_list = []
 
@@ -42,3 +46,9 @@ def update_ban_list():
 def user_is_ban(user_id):
     logging.debug(f'{user_id} is admin {user_id in admin_list}')
     return user_id in ban_list
+
+
+@MWT(timeout=60 * 60)
+def get_groupadmin(chat_id):
+    bot = Bot(token=TOKEN)
+    return [admin.user.id for admin in bot.get_chat_administrators(chat_id)]
