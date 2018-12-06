@@ -35,6 +35,12 @@ def start(bot, update):
     send start info
     """
     bot.send_message(chat_id=update.message.chat_id, text=START_MSG)
+    session = DBSession()
+    user = session.query(User).filter_by(id=update.message.from_user['id']).first()
+    if user is None:
+        session.add(User(id=update.message.from_user['id']))
+    session.commit()
+    session.close()
 
 
 @command_wrap(name="add", pass_args=True)
