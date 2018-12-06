@@ -54,9 +54,27 @@ class Lang(BaseFilter):
         return ret
 
 
+class MaxMsg(BaseFilter):
+
+    def filter(self, message):
+        chat_data: dict = get_chat_data(chat_id=message.chat_id)
+        if not chat_data.get(ChatData.MAXFLOOD):
+            return False
+
+        user_data = get_user_data(message.from_user.id)
+        if not user_data.get(UserData.MAXMSG_DATA):
+            user_data[UserData.MAXMSG_DATA] = {}
+        msg_data = user_data[UserData.MAXMSG_DATA].get(message.date.day, [])
+        if len(msg_data) > chat_data.get(ChatData.MAXFLOOD):
+            return True
+        user_data[UserData.MAXMSG_DATA][message.date.day].append(1)
+        return False
+
+
 class Flood(BaseFilter):
 
     def filter(self, message):
+
         if not check_ban_state(message.chat_id, BanMessageType.FLOOD):
             return False
         chat_data: dict = get_chat_data(chat_id=message.chat_id)
@@ -65,7 +83,6 @@ class Flood(BaseFilter):
         if not time or not num:
             return
         now_time = datetime.now().timestamp()
-
         user_data = get_user_data(message.from_user.id)
         msg_data = user_data.get(UserData.MSG_DATA, [])
         if len(msg_data) < num:
@@ -138,6 +155,7 @@ class NewMember(BaseFilter):
         if not message.new_chat_members:
             return False
         return True
+
 
 class Lock(BaseFilter):
     def filter(self, message):

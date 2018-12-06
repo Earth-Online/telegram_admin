@@ -374,6 +374,28 @@ def setflood(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
+@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
+@check_admin()
+@run_async
+def setmaxmessage(bot, update, args, chat_data):
+    """
+    :param args:
+    :param chat_data:
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    if len(args) == 0 and chat_data.get(ChatData.MAXFLOOD):
+        chat_data.pop(ChatData.MAXFLOOD)
+        return
+    if not args[0].isdigit():
+        bot.send_message(update.message.chat_id, text=NUM_ERROR)
+    chat_data[ChatData.MAXFLOOD] = int(args[0])
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+
+
 @command_wrap(pass_chat_data=True, state=RunState.RUN)
 @check_admin()
 @run_async

@@ -15,7 +15,7 @@ from telegram.ext.filters import Filters
 @messaage_warp(filters=Filters.group & ~filter.Admin() & ~filter.GroupAdmin() & (
         filter.TelegramLink() | filter.Lang() | filter.Flood() |
         filter.Emoji() | filter.Gif() | filter.Numbers()
-        | filter.BanWord() | filter.Lock() | filter.AutoLock()),
+        | filter.BanWord() | filter.Lock() | filter.AutoLock() | filter.MaxMsg()),
                pass_chat_data=True,
                pass_user_data=True)
 @run_async

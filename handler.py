@@ -7,7 +7,7 @@ import logging
 from command import (start, run, add_admin, clearwarns, get_id, admins, get_groups, link, stop, info,
                      globalban, unglobalban, globalban_list, maxwarns, settimeflood, setflood, settings,
                      banword, unbanword, banwords, save, lang, save_data, kick, lock, unlock, autolock,
-                     cancel, START_TIME, STOP_TIME, lockstart, lockstop
+                     cancel, START_TIME, STOP_TIME, lockstart, lockstop, setmaxmessage
                      )
 
 from telegram.ext import ConversationHandler, RegexHandler, MessageHandler
@@ -37,6 +37,7 @@ admin_handler = [
     setflood,
     settings,
     settimeflood,
+    setmaxmessage,
     banwords,
     lang,
     clearwarns,

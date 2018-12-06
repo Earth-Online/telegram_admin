@@ -124,9 +124,12 @@ class BanMessageType:
 class UserData:
     WARN = "warn"
     MSG_DATA = "msg_data"
+    MAXMSG_DATA = "maxmsg"
+
 
 class ChatData:
     MAXWARN = "maxwarn"
+    MAXFLOOD = "maxflood"
     FLOOD_TIME = "time"
     FLOOD_NUM = "flood_num"
     BANWORD = "banword"
