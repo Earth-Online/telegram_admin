@@ -99,7 +99,7 @@ def get_conv_data():
     handlers = dispatcher.handlers.get(DEFAULT_GROUP)
     for handler in handlers:
         # hard code
-        if isinstance(handler, ConversationHandler) and len(handler.states) > 5:
+        if isinstance(handler, ConversationHandler) and handler.states.get(1):
             resolved = dict()
             for k, v in handler.conversations.items():
                 if isinstance(v, tuple) and len(v) is 2 and isinstance(v[1], Promise):

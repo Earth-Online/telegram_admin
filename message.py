@@ -92,7 +92,7 @@ def limit_set(bot, update, chat_data, groups):
     return RUN
 
 
-@messaage_warp(filters=filter.NewMember)
+@messaage_warp(filters=filter.NewMember())
 @run_async
 def new_member(bot, update):
     for members in update.message.new_chat_members:

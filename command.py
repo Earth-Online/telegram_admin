@@ -15,6 +15,7 @@ from telegram.chatmember import ChatMember
 from telegram.ext import ConversationHandler
 from telegram.ext.dispatcher import run_async
 from telegram.ext.filters import Filters
+from telegram.chat import Chat
 
 from admin import update_admin_list, update_ban_list
 from config import CHAT_DATA_FILE, USER_DATA_FILE, CONV_DATA_FILE
@@ -87,7 +88,10 @@ def run(bot, update):
         bot.send_message(chat_id=update.message.chat_id, text=BOT_NO_ADMIN_MSG)
         return
     session = DBSession()
-    group_link = bot.export_chat_invite_link(chat_id=update.message.chat_id)
+    if update.message.chat.type == Chat.SUPERGROUP:
+        group_link = bot.export_chat_invite_link(chat_id=update.message.chat_id)
+    else:
+        group_link = ""
     group = Group(id=update.message.chat_id, title=update.message.chat.title, link=group_link)
     session.merge(group)
     session.commit()
