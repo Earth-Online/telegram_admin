@@ -46,6 +46,16 @@ def start(bot, update):
     session.close()
 
 
+@command_wrap()
+@run_async
+def ping(bot, update):
+    """
+    send start info
+    """
+    pingtime = datetime.now().timestamp() - update.message.date.timestamp()
+    bot.send_message(chat_id=update.message.chat_id, text=pingtime)
+
+
 @command_wrap(name="add", pass_args=True)
 @check_admin()
 def add_admin(bot, update, args):
