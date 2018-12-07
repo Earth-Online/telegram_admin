@@ -46,10 +46,6 @@ command_handler = [
     timer,
     deletetimer,
     listtimer,
-    set_handler,
-    telegram_link_handler,
-    new_member,
-    common_message_handler,
 ]
 
 message_handler = [
