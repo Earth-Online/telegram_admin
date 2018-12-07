@@ -701,7 +701,7 @@ def listtimer(bot, update, job_queue):
     ret_text = ""
     for job in jobs:
         if not job.removed:
-            ret_text = ret_text + f"{job.context[0]} {job.context[1]}"
+            ret_text = ret_text + f"{job.context[0]} {job.context[1]}\n"
     if not ret_text:
         bot.send_message(chat_id=update.message.chat_id, text=NO_INFO_MSG)
         return
@@ -810,7 +810,11 @@ def save_data(bot=None, job=None):
         pickle.dump(chat_data, f)
     with open(USER_DATA_FILE, 'wb+') as f:
         pickle.dump(user_data, f)
-    save_jobs(job.job_queue)
+    if job:
+        if isinstance(job, JobQueue):
+            save_jobs(job)
+        else:
+            save_jobs(job.job_queue)
     logging.info("save data ok")
 
 

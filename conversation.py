@@ -62,7 +62,7 @@ def send_group(bot, update):
     session = DBSession()
     groups = session.query(Group).all()
     send_admin_msg(users=groups, bot=bot, update=update)
-    bot.send_message(chat_id=update.message.id, text=USER_FORWARD_STOP)
+    bot.send_message(chat_id=update.message['id'], text=USER_FORWARD_STOP)
     session.close()
     return ConversationHandler.END
 
@@ -104,7 +104,6 @@ def forward_group(bot, update):
     return ConversationHandler.END
 
 
-@messaage_warp(filters=Filters.all)
 def send_admin_msg(users, bot, update):
     if Filters.text(update.message):
         for user in users:
@@ -139,7 +138,6 @@ conv_handle = ConversationHandler(
         RunState.forwardusers: [forward_user],
         RunState.USER_FORWARD: [send_user],
         RunState.GRUOP_FORWARD: [send_group]
-
     },
     fallbacks=[cancel]
 )
