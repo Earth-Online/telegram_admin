@@ -491,7 +491,7 @@ def unbanword(bot, update, args, chat_data):
     chat_data[ChatData.BANWORD_RE] = word_re(group_banwords)
 
 
-@command_wrap(pass_chat_data=True, state=RunState.RUN)
+@command_wrap(pass_chat_data=True)
 @check_admin()
 @check_run()
 @run_async
@@ -633,7 +633,7 @@ START_TIME = 999
 STOP_TIME = 1000
 
 
-@command_wrap(state=RunState.START_TIME)
+@command_wrap()
 @check_admin()
 @check_run()
 def autolock(bot, update):
@@ -734,7 +734,7 @@ def unautolock(bot, update, chat_data):
     chat_data[ChatData.AUTO_LOOK_STOP] = None
 
 
-@command_wrap(state=ConversationHandler.END)
+@command_wrap()
 @check_admin()
 def cancel(bot, update):
     """
@@ -744,7 +744,7 @@ def cancel(bot, update):
     :type update: Update
     :return:
     """
-    pass
+    return ConversationHandler.END
 
 
 @messaage_warp(filters=Filters.all, pass_chat_data=True)
