@@ -127,7 +127,7 @@ def clearwarns(bot, update, args):
                 user_list.append(entity.user['id'])
     user_data = get_user_data()
     for user in user_list:
-        user_data[user][UserData.WARN] = 0
+        user_data[user.id][UserData.WARN] = 0
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
@@ -226,6 +226,9 @@ def link(bot, update):
     :return:
     """
     # TODO 更新数据库
+    if not update.message.chat.type == Chat.SUPERGROUP:
+        bot.send_message(chat_id=update.message.chat_id, text="not supergroup")
+        return
     group_link = bot.export_chat_invite_link(update.message.chat_id)
     bot.send_message(chat_id=update.message.chat_id, text=group_link)
 
@@ -251,6 +254,7 @@ def info(bot, update):
 def globalban(bot, update, args):
     """
     globalban a user
+    :param args:
     :param bot:
     :type bot: Bot
     :param update:
@@ -266,8 +270,8 @@ def globalban(bot, update, args):
     if not len(ban_user_list):
         bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
         return
-    ban_user(user_list=ban_user_list, ban=True)
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    ban_user(user_list=ban_user_list, ban=True)
     update_ban_list()
 
 
@@ -313,7 +317,7 @@ def globalban_list(bot, update):
     datas = session.query(User).filter_by(isban=True).all()
     ret_text = ""
     for data in datas:
-        ret_text = ret_text + GLOBAL_BAN_FORMAT.format(user_name=data.id, user_id=data.id)
+        ret_text = ret_text + GLOBAL_BAN_FORMAT.format(user_id=data.id)
     session.close()
     if ret_text == "":
         bot.send_message(chat_id=update.message.chat_id, text=NO_INFO_MSG)
@@ -364,6 +368,7 @@ def settimeflood(bot, update, args, chat_data):
     """
     if len(args) == 0 and chat_data.get(ChatData.FLOOD_TIME):
         chat_data.pop(ChatData.FLOOD_TIME)
+        bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
         return
     if not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=NUM_ERROR)
@@ -387,6 +392,7 @@ def setflood(bot, update, args, chat_data):
     """
     if len(args) == 0 and chat_data.get(ChatData.FLOOD_NUM):
         chat_data.pop(ChatData.FLOOD_NUM)
+        bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
         return
     if not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=NUM_ERROR)
@@ -410,6 +416,7 @@ def setmaxmessage(bot, update, args, chat_data):
     """
     if len(args) == 0 and chat_data.get(ChatData.MAXFLOOD):
         chat_data.pop(ChatData.MAXFLOOD)
+        bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
         return
     if not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=NUM_ERROR)
@@ -523,7 +530,7 @@ def banwords(bot, update, chat_data):
 @command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
 @check_run()
-@run_async
+# @run_async
 def lang(bot, update, args, chat_data):
     """
     set lang limit
@@ -544,7 +551,7 @@ def lang(bot, update, args, chat_data):
         ban_list.append(args[0])
         chat_data[ChatData.LANG] = ban_list
     elif args[1] == OpenState.OPEN:
-        if args in ban_list:
+        if args[0] in ban_list:
             ban_list.remove(args[0])
         chat_data[ChatData.LANG] = ban_list
     else:

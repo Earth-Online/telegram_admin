@@ -177,7 +177,7 @@ MARKDOWN_BAN = [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE,
 allow_setting = [BanMessageType.__dict__[key] for key in filter(lambda x: x[0] != "_", BanMessageType.__dict__)]
 
 allow_str = "|".join(allow_setting)
-SETTING_RE = re.compile(f"^({allow_str})\s+(on|off)$")
+SETTING_RE = re.compile(f"^({allow_str})\\s+(on|off)$")
 NUM_RE = re.compile(r"\d")
 
 BANWORD_KEY = "banwordre"

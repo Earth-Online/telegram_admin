@@ -34,14 +34,14 @@ def bcusers(bot, update):
 @check_admin()
 def forwardusers(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
-    return RunState.forwardgroups
+    return RunState.forwardusers
 
 
 @command_wrap()
 @check_admin()
 def forwardgroups(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
-    return RunState.forwardusers
+    return RunState.forwardgroups
 
 
 @command_wrap()
@@ -124,6 +124,10 @@ def send_admin_msg(users, bot, update):
         for user in users:
             bot.send_video(chat_id=user.id, video=update.message.video.file_id, caption=update.message.caption)
             sleep(1)
+    elif Filters.audio(update.message):
+        for user in users:
+            bot.send_audio(chat_id=user.id, audio=update.message.audio.file_id, caption=update.message.caption)
+            sleep(SEND_SLEEP)
     elif Filters.document(update.message):
         for user in users:
             bot.send_document(chat_id=user.id, document=update.message.document.file_id,

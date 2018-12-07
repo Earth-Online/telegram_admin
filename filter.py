@@ -72,9 +72,10 @@ class MaxMsg(BaseFilter):
         if not user_data.get(UserData.MAXMSG_DATA):
             user_data[UserData.MAXMSG_DATA] = {}
         msg_data = user_data[UserData.MAXMSG_DATA].get(message.date.day, [])
-        if len(msg_data) > chat_data.get(ChatData.MAXFLOOD):
+        if len(msg_data) >= chat_data.get(ChatData.MAXFLOOD):
             return True
-        user_data[UserData.MAXMSG_DATA][message.date.day].append(1)
+        msg_data.append(1)
+        user_data[UserData.MAXMSG_DATA][message.date.day] = msg_data
         return False
 
 

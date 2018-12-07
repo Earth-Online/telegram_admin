@@ -44,6 +44,7 @@ def loaddata(job_queue):
         load_jobs(job_queue)
     except FileNotFoundError:
         logging.warning("job_data file not found")
+        job_queue.run_repeating(save_data, interval=DEFAULT_CHECK_TIME)
 
 
 def main():
@@ -62,7 +63,6 @@ def main():
     for message_hand in message_handler:
         dispatcher.add_handler(message_hand)
     dispatcher.add_error_handler(error_handler)
-    job.run_repeating(save_data, interval=DEFAULT_CHECK_TIME)
 
     update_admin_list()
     update_ban_list()
