@@ -182,6 +182,10 @@ def get_groups(bot, update):
     """
     session = DBSession()
     groups = session.query(Group).all()
+    if groups is None:
+        bot.send_message(chat_id=update.message.chat_id, text=NO_INFO_MSG)
+        session.close()
+        return
     ret_text = ""
     for group in groups:
         ret_text = ret_text + GROUP_FORMAT.format(group_title=group.title, group_id=group.id,
@@ -221,6 +225,7 @@ def link(bot, update):
     :type update: Update
     :return:
     """
+    # TODO 更新数据库
     group_link = bot.export_chat_invite_link(update.message.chat_id)
     bot.send_message(chat_id=update.message.chat_id, text=group_link)
 

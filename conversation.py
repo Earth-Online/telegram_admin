@@ -32,14 +32,14 @@ def bcusers(bot, update):
 
 @command_wrap()
 @check_admin()
-def bcusers(bot, update):
+def forwardusers(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
     return RunState.forwardgroups
 
 
 @command_wrap()
 @check_admin()
-def bcusers(bot, update):
+def forwardgroups(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
     return RunState.forwardusers
 
@@ -133,7 +133,7 @@ def send_admin_msg(users, bot, update):
 
 
 conv_handle = ConversationHandler(
-    entry_points=[bcgroups, bcusers, forward_group, forward_user],
+    entry_points=[bcgroups, bcusers, forwardusers, forwardgroups],
     states={
         RunState.forwardgroups: [forward_group],
         RunState.forwardusers: [forward_user],
