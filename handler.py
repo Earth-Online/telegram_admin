@@ -7,8 +7,8 @@ import logging
 from command import (start, run, add_admin, clearwarns, get_id, admins, get_groups, link, stop, info,
                      globalban, unglobalban, globalban_list, maxwarns, settimeflood, setflood, settings,
                      banword, unbanword, banwords, save, lang, save_data, kick, lock, unlock, autolock,
-                     cancel, START_TIME, STOP_TIME, lockstart, lockstop, setmaxmessage
-                     )
+                     cancel, START_TIME, STOP_TIME, lockstart, lockstop, setmaxmessage, timer, deletetimer,
+                     listtimer)
 
 from telegram.ext import ConversationHandler, RegexHandler, MessageHandler
 from message import common_message_handler, telegram_link_handler, limit_set, new_member
@@ -26,10 +26,9 @@ command_handler = [
     globalban_list,
     globalban,
     unglobalban,
-    save
-]
-
-admin_handler = [
+    stop,
+    run,
+    save,
     link,
     maxwarns,
     banword,
@@ -44,6 +43,16 @@ admin_handler = [
     kick,
     lock,
     unlock,
+    timer,
+    deletetimer,
+    listtimer,
+    set_handler,
+    telegram_link_handler,
+    new_member,
+    common_message_handler,
+]
+
+message_handler = [
     set_handler,
     telegram_link_handler,
     new_member,
@@ -63,24 +72,11 @@ auto_lock_handler = ConversationHandler(
     fallbacks=[cancel]
 )
 
-messgae_handler = ConversationHandler(
-    entry_points=[run],
-    states={
-        RUN: admin_handler,
-        STOP: [
 
-        ]
-
-    },
-    fallbacks=[stop]
-)
-
-
-def stop_handler(sign, frame):
+def stop_handler(_, __):
     save_data()
 
 
 def error_handler(bot, update, error):
     bot.send_message(chat_id=update.message.chat_id, text="a error")
     logging.error(error)
-    return messgae_handler.current_conversation

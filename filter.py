@@ -16,6 +16,13 @@ from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, ChatData, UserData
 from tool import check_ban_state, get_chat_data, get_user_data
 
 
+class Run(BaseFilter):
+
+    def filter(self, message):
+        chat_data = get_chat_data(message.chat_id)
+        return chat_data.get(ChatData.RUN)
+
+
 class TelegramLink(BaseFilter):
     def filter(self, message):
         if not check_ban_state(message.chat_id, BanMessageType.TG_LINK):

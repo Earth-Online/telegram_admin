@@ -13,9 +13,10 @@ from constant import RUN, BAN_STATE
 from admin import user_is_admin
 from telegram.ext import Dispatcher
 from re import compile
+from constant import ChatData, NO_RUN_MSG
 
 
-def command_wrap(name: str = "", state=RUN, pass_chat_data=False, pass_user_data=False, pass_args=False, **kwargs):
+def command_wrap(name: str = "", pass_chat_data=False, pass_user_data=False, pass_args=False, **kwargs):
     """
     wrap command handle
     """
@@ -28,8 +29,6 @@ def command_wrap(name: str = "", state=RUN, pass_chat_data=False, pass_user_data
                 ret = func(*args, **kwargs)
             except Exception as e:
                 logging.error(e)
-            if state:
-                return state
             return ret
 
         return CommandHandler(name or func.__name__, pass_chat_data=pass_chat_data, pass_user_data=pass_user_data,
@@ -62,8 +61,28 @@ def check_admin(admin=True):
             """
             user = update.message.from_user
             if user_is_admin(user.id) != admin:
-                # TODO add some error msg
                 bot.send_message(chat_id=update.message.chat_id, text="you not admin")
+                return
+            return func(bot, update, *args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def check_run():
+    def decorator(func):
+        @wraps(func)
+        def wrapper(bot, update, *args, **kwargs):
+            """
+            :param bot:
+            :type bot: Bot
+            :param update:
+            :type update:Update
+            """
+            chat_data = get_chat_data(update.message.chat_id)
+            if not chat_data.get(ChatData.RUN):
+                bot.send_message(chat_id=update.message.chat_id, text=NO_RUN_MSG)
                 return
             return func(bot, update, *args, **kwargs)
 
@@ -128,3 +147,8 @@ def kick_user(bot, update, user_list):
     """
     for user in user_list:
         bot.kick_chat_member(chat_id=update.message.chat_id, user_id=user)
+
+
+def time_send_msg(bot, job):
+    text = job.context[1]
+    bot.send_message(chat_id=job.context[2], text=text)

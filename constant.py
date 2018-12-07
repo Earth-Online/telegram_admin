@@ -20,11 +20,18 @@ BOT_NO_ADMIN_MSG = "I SHOULD BE ADMIN IN THE GROUP"
 
 BOT_IS_ADMIN_MSG = "✅ Done Active The Group"
 
+NO_RUN_MSG = "bot not run. pleser use /run"
+
+NO_SUPPORT_FORMAT = "not support format"
+
 BOT_STOP_MSG = "bot stop"
 
 NO_INFO_MSG = "not have some info"
 
 NUM_ERROR = "not a effective number"
+
+USER_FORWARD_START = "Send The Message Now"
+USER_FORWARD_STOP = "Done Send message to all"
 
 OPITON_ERROR = "error option"
 
@@ -84,6 +91,10 @@ class RunState:
     STOP = 0
     START_TIME = 999
     STOP_TIME = 1000
+    USER_FORWARD = 888
+    GRUOP_FORWARD = 889
+    forwardgroups = 777
+    forwardusers = 666
 
 
 class BanMessageType:
@@ -139,6 +150,7 @@ class ChatData:
     BANSTATE = "ban_state"
     AUTO_LOOK_START = "look_start"
     AUTO_LOOK_STOP = "look_stop"
+    RUN = "run"
 
 
 LIMIT_DICT = {

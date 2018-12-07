@@ -5,14 +5,15 @@ bot command
 """
 import logging
 import pickle
-from datetime import datetime
+from datetime import datetime, time, timedelta
+from typing import List
 
 from telegram import ForceReply
 from telegram import ParseMode
 from telegram import Update, Bot, MessageEntity
-from telegram import User as tg_user
+from telegram import User as TgUser
 from telegram.chatmember import ChatMember
-from telegram.ext import ConversationHandler
+from telegram.ext import ConversationHandler, Job, JobQueue
 from telegram.ext.dispatcher import run_async
 from telegram.ext.filters import Filters
 from telegram.chat import Chat
@@ -27,7 +28,7 @@ from module import DBSession
 from module.group import Group
 from module.user import User
 from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data, kick_user, \
-    messaage_warp
+    messaage_warp, check_run, time_send_msg
 
 
 @command_wrap()
@@ -71,10 +72,10 @@ def add_admin(bot, update, args):
     bot.send_message(chat_id=update.message.chat_id, text=ADD_ADMIN_OK_MSG)
 
 
-@command_wrap(state=RunState.RUN)
+@command_wrap(pass_chat_data=True)
 @check_admin()
 @run_async
-def run(bot, update):
+def run(bot, update, chat_data):
     """Run bot filter function
     :param bot:
     :type bot: Bot
@@ -96,11 +97,13 @@ def run(bot, update):
     session.merge(group)
     session.commit()
     session.close()
+    chat_data[ChatData.RUN] = True
     bot.send_message(chat_id=update.message.chat_id, text=BOT_IS_ADMIN_MSG)
 
 
-@command_wrap(pass_args=True, state=RunState.RUN)
+@command_wrap(pass_args=True)
 @check_admin()
+@check_run()
 @run_async
 def clearwarns(bot, update, args):
     """
@@ -115,7 +118,7 @@ def clearwarns(bot, update, args):
     user_list = []
     for _ in args:
         if _.isdigit():
-            user_list.append(tg_user(id=_, first_name="temp", is_bot=False))
+            user_list.append(TgUser(id=_, first_name="temp", is_bot=False))
     if update.message.reply_to_message:
         user_list.append(update.message.reply_to_message.from_user['id'])
     if update.message.entities:
@@ -187,10 +190,11 @@ def get_groups(bot, update):
     session.close()
 
 
-@command_wrap(state=ConversationHandler.END)
+@command_wrap(pass_chat_data=True)
 @check_admin()
+@check_run()
 @run_async
-def stop(bot, update):
+def stop(bot, update, chat_data):
     """
     Stop bot filer function
     :param bot:
@@ -199,12 +203,14 @@ def stop(bot, update):
     :type update: Update
     :return:
     """
+    chat_data[ChatData.RUN] = False
     bot.send_message(chat_id=update.message.chat_id, text=BOT_STOP_MSG)
     # return ConversationHandler.END
 
 
-@command_wrap(state=RunState.RUN)
+@command_wrap()
 @check_admin()
+@check_run()
 @run_async
 def link(bot, update):
     """
@@ -249,7 +255,7 @@ def globalban(bot, update, args):
     ban_user_list = []
     for _ in args:
         if _.isdigit():
-            ban_user_list.append(tg_user(id=_, first_name="not get", is_bot=False))
+            ban_user_list.append(TgUser(id=_, first_name="not get", is_bot=False))
     for entity in update.message.parse_entities(MessageEntity.TEXT_MENTION).keys():
         ban_user_list.append(entity.user)
     if not len(ban_user_list):
@@ -275,7 +281,7 @@ def unglobalban(bot, update, args):
     ban_user_list = []
     for _ in args:
         if _.isdigit():
-            ban_user_list.append(tg_user(id=_, first_name="not get", username="not get", is_bot=False))
+            ban_user_list.append(TgUser(id=_, first_name="not get", username="not get", is_bot=False))
     for entity in update.message.parse_entities(MessageEntity.TEXT_MENTION).keys():
         ban_user_list.append(entity.user)
     if not len(ban_user_list):
@@ -310,8 +316,9 @@ def globalban_list(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=ret_text, parse_mode=ParseMode.MARKDOWN)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
+@command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@check_run()
 @run_async
 def maxwarns(bot, update, args, chat_data):
     """
@@ -334,8 +341,9 @@ def maxwarns(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
+@command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@check_run()
 @run_async
 def settimeflood(bot, update, args, chat_data):
     """
@@ -357,8 +365,9 @@ def settimeflood(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
+@command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@check_run()
 @run_async
 def setflood(bot, update, args, chat_data):
     """
@@ -379,8 +388,9 @@ def setflood(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
+@command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@check_run()
 @run_async
 def setmaxmessage(bot, update, args, chat_data):
     """
@@ -401,8 +411,9 @@ def setmaxmessage(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True, state=RunState.RUN)
+@command_wrap(pass_chat_data=True)
 @check_admin()
+@check_run()
 @run_async
 def settings(bot, update, chat_data):
     """
@@ -421,8 +432,9 @@ def settings(bot, update, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
+@command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@check_run()
 @run_async
 def banword(bot, update, args, chat_data):
     """
@@ -446,8 +458,9 @@ def banword(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
+@command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@check_run()
 @run_async
 def unbanword(bot, update, args, chat_data):
     """
@@ -480,6 +493,7 @@ def unbanword(bot, update, args, chat_data):
 
 @command_wrap(pass_chat_data=True, state=RunState.RUN)
 @check_admin()
+@check_run()
 @run_async
 def banwords(bot, update, chat_data):
     """
@@ -500,8 +514,9 @@ def banwords(bot, update, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, state=RunState.RUN)
+@command_wrap(pass_chat_data=True, pass_args=True)
 @check_admin()
+@check_run()
 @run_async
 def lang(bot, update, args, chat_data):
     """
@@ -548,8 +563,9 @@ def save(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_args=True, state=RunState.RUN)
+@command_wrap(pass_args=True)
 @check_admin()
+@check_run()
 @run_async
 def kick(bot, update, args):
     """
@@ -575,8 +591,9 @@ def kick(bot, update, args):
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_args=True, pass_chat_data=True, state=RunState.RUN)
+@command_wrap(pass_args=True, pass_chat_data=True)
 @check_admin()
+@check_run()
 @run_async
 def lock(bot, update, args, chat_data):
     """
@@ -595,8 +612,9 @@ def lock(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True, state=RunState.RUN)
+@command_wrap(pass_chat_data=True)
 @check_admin()
+@check_run()
 @run_async
 def unlock(bot, update, chat_data):
     """
@@ -617,6 +635,7 @@ STOP_TIME = 1000
 
 @command_wrap(state=RunState.START_TIME)
 @check_admin()
+@check_run()
 def autolock(bot, update):
     """
     :param bot:
@@ -626,10 +645,83 @@ def autolock(bot, update):
     :return:
     """
     update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
+    return RunState.START_TIME
 
 
-@command_wrap(state=RunState.RUN, pass_chat_data=True)
+@command_wrap(pass_job_queue=True, pass_args=True)
 @check_admin()
+@check_run()
+@run_async
+def timer(bot, update, job_queue, args):
+    """
+
+    :param bot:
+    :param update:
+    :param job_queue:
+    :param args:
+    :type job_queue:  JobQueue
+    :return:
+    """
+    if len(args) < 2:
+        bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
+        return
+    try:
+        day = datetime.strptime(args[0], "%H:%M")
+        time = day.time()
+    except ValueError:
+        bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
+        return
+    job_queue.run_repeating(callback=time_send_msg, context=[args[0], args[1], update.message.chat_id],
+                            name=update.message.chat_id, interval=timedelta(days=1), first=time)
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+
+
+@command_wrap(pass_job_queue=True)
+@check_admin()
+@check_run()
+@run_async
+def listtimer(bot, update, job_queue):
+    """
+
+    :param bot:
+    :param update:
+    :param job_queue:
+    :return:
+    """
+    jobs: List[Job] = job_queue.get_jobs_by_name(update.message.chat_id)
+    if not len(jobs):
+        bot.send_message(chat_id=update.message.chat_id, text=NO_INFO_MSG)
+        return
+    ret_text = ""
+    for job in jobs:
+        if not job.removed:
+            ret_text = ret_text + f"{job.context[0]} {job.context[1]}"
+    if not ret_text:
+        bot.send_message(chat_id=update.message.chat_id, text=NO_INFO_MSG)
+        return
+    bot.send_message(chat_id=update.message.chat_id, text=ret_text)
+
+
+@command_wrap(pass_job_queue=True, pass_args=True)
+@check_admin()
+@check_run()
+@run_async
+def deletetimer(bot, update, job_queue, args):
+    if not len(args) or not args[0].isdigit():
+        bot.send_message(chat_id=update.message.chat_id, text=NUM_ERROR)
+        return
+    jobs = job_queue.get_jobs_by_name(update.message.chat_id)
+    if len(jobs) < int(args[0]):
+        bot.send_message(chat_id=update.message.chat_id, text=NUM_ERROR)
+        return
+    jobs[int(args)].schedule_removal()
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+
+
+@command_wrap(pass_chat_data=True)
+@check_admin()
+@check_run()
+@run_async
 def unautolock(bot, update, chat_data):
     """
     :param bot:
@@ -657,6 +749,7 @@ def cancel(bot, update):
 
 @messaage_warp(filters=Filters.all, pass_chat_data=True)
 @check_admin()
+@check_run()
 @run_async
 def lockstart(bot, update, chat_data):
     """
@@ -680,6 +773,7 @@ def lockstart(bot, update, chat_data):
 
 @messaage_warp(filters=Filters.all, pass_chat_data=True)
 @check_admin()
+@check_run()
 @run_async
 def lockstop(bot, update, chat_data):
     """
@@ -703,16 +797,12 @@ def lockstop(bot, update, chat_data):
 
 
 def save_data(_=None, __=None):
-
     user_data = get_user_data()
     chat_data = get_chat_data()
-    conv_data = get_conv_data()
     with open(CHAT_DATA_FILE, 'wb+') as f:
         pickle.dump(chat_data, f)
     with open(USER_DATA_FILE, 'wb+') as f:
         pickle.dump(user_data, f)
-    with open(CONV_DATA_FILE, 'wb+') as f:
-        pickle.dump(conv_data, f)
     logging.info("save data ok")
 
 

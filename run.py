@@ -10,7 +10,8 @@ from telegram.ext import Updater, Dispatcher
 
 from command import save_data
 from config import LOG_LEVEL, TOKEN, LOG_FILE, CHAT_DATA_FILE, USER_DATA_FILE, DEFAULT_CHECK_TIME, CONV_DATA_FILE
-from handler import command_handler, messgae_handler, set_handler, stop_handler, error_handler, auto_lock_handler
+from conversation import conv_handle
+from handler import command_handler, set_handler, stop_handler, error_handler, auto_lock_handler, message_handler
 from admin import update_admin_list, update_ban_list
 
 f_handler = FileHandler(LOG_FILE)
@@ -38,12 +39,6 @@ def loaddata():
             dispatch.user_data = user_data
     except FileNotFoundError:
         logging.warning("user_data file not found")
-    try:
-        with open(CONV_DATA_FILE, "rb") as f:
-            conv_data = pickle.load(f)
-            messgae_handler.conversations = conv_data
-    except FileNotFoundError:
-        logging.warning("user_data file not found")
 
 
 def main():
@@ -58,7 +53,9 @@ def main():
         dispatcher.add_handler(command)
     dispatcher.add_handler(set_handler)
     dispatcher.add_handler(auto_lock_handler)
-    dispatcher.add_handler(messgae_handler)
+    dispatcher.add_handler(conv_handle)
+    for message_hand in message_handler:
+        dispatcher.add_handler(message_hand)
     dispatcher.add_error_handler(error_handler)
     job.run_repeating(save_data, interval=DEFAULT_CHECK_TIME)
 

@@ -8,11 +8,11 @@ from admin import user_is_ban
 from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType, RUN, BAN_STATE
 from telegram import Update, Bot
 from telegram.ext.dispatcher import run_async
-from tool import messaage_warp, check_admin, kick_user
+from tool import messaage_warp, check_admin, kick_user, check_run
 from telegram.ext.filters import Filters
 
 
-@messaage_warp(filters=Filters.group & ~filter.Admin() & ~filter.GroupAdmin() & (
+@messaage_warp(filters=filter.Run() & Filters.group & (~filter.Admin()) & (~filter.GroupAdmin()) & (
         filter.TelegramLink() | filter.Lang() | filter.Flood() |
         filter.Emoji() | filter.Gif() | filter.Numbers()
         | filter.BanWord() | filter.Lock() | filter.AutoLock() | filter.MaxMsg()),
@@ -34,7 +34,7 @@ def telegram_link_handler(bot, update, user_data, chat_data):
     return RUN
 
 
-@messaage_warp(filters=(Filters.group & Filters.all & ~filter.Admin() & ~filter.GroupAdmin()),
+@messaage_warp(filters=(filter.Run() & Filters.group & Filters.all & ~filter.Admin() & ~filter.GroupAdmin()),
                pass_chat_data=True, pass_user_data=True)
 @run_async
 def common_message_handler(bot, update, user_data, chat_data):
@@ -69,6 +69,7 @@ def common_message_handler(bot, update, user_data, chat_data):
 
 
 @check_admin(admin=True)
+@check_run()
 @run_async
 def limit_set(bot, update, chat_data, groups):
     if not chat_data.get('ban_state'):
