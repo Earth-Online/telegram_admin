@@ -56,7 +56,7 @@ class Lang(BaseFilter):
             return False
         try:
             ret = detect(message.text) in ban_list
-        except DetectorFactory:
+        except Exception:
             return False
         return ret
 

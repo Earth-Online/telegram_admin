@@ -98,7 +98,7 @@ def limit_set(bot, update, chat_data, groups):
 def new_member(bot, update):
     for members in update.message.new_chat_members:
         if user_is_ban(members.id):
-            kick_user(bot=bot, update=update, user_list=[members])
+            kick_user(bot=bot, update=update, user_list=[members.id])
     return RUN
 
 
@@ -112,7 +112,7 @@ def warn_user(bot, update, user_data, chat_data):
     :type user_data: dict
     :return:
     """
-    if chat_data.get(BAN_STATE, {}).get(BanMessageType.WARN) is False:
+    if not chat_data.get(BAN_STATE, {}).get(BanMessageType.WARN):
         bot.send_message(chat_id=update.message.chat_id, text=WARN_MSG)
         user_data['warn'] = user_data.get('warn', 0) + 1
         if chat_data.get('maxwarn'):

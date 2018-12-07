@@ -17,6 +17,7 @@ USER_DATA_FILE = "./data/user_data.pickle"
 
 CONV_DATA_FILE = "./data/conv_data.pickle"
 
+JOB_DATA_FILE = "./data/job_data.pickle"
 # bot token
 TOKEN = os.environ.get('token') or ''
 

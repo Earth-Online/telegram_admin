@@ -28,7 +28,7 @@ from module import DBSession
 from module.group import Group
 from module.user import User
 from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data, kick_user, \
-    messaage_warp, check_run, time_send_msg
+    messaage_warp, check_run, time_send_msg, save_jobs
 
 
 @command_wrap()
@@ -339,6 +339,7 @@ def maxwarns(bot, update, args, chat_data):
     """
     if len(args) == 0 and chat_data.get(ChatData.MAXWARN):
         chat_data.pop(ChatData.MAXWARN)
+        bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
         return
     if not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=NUM_ERROR)
@@ -719,7 +720,7 @@ def deletetimer(bot, update, job_queue, args):
     if len(jobs) < int(args[0]):
         bot.send_message(chat_id=update.message.chat_id, text=NUM_ERROR)
         return
-    jobs[int(args)].schedule_removal()
+    jobs[int(args[0])].schedule_removal()
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
@@ -737,6 +738,7 @@ def unautolock(bot, update, chat_data):
     """
     chat_data[ChatData.AUTO_LOOK_START] = None
     chat_data[ChatData.AUTO_LOOK_STOP] = None
+    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
 
 
 @command_wrap()
@@ -792,22 +794,23 @@ def lockstop(bot, update, chat_data):
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
         return STOP_TIME
     try:
-        time = datetime.strptime(update.message.text, "%H:%M")
+        locktime = datetime.strptime(update.message.text, "%H:%M")
     except ValueError:
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
         return STOP_TIME
-    chat_data[ChatData.AUTO_LOOK_STOP] = time
+    chat_data[ChatData.AUTO_LOOK_STOP] = locktime
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
     return ConversationHandler.END
 
 
-def save_data(_=None, __=None):
+def save_data(bot=None, job=None):
     user_data = get_user_data()
     chat_data = get_chat_data()
     with open(CHAT_DATA_FILE, 'wb+') as f:
         pickle.dump(chat_data, f)
     with open(USER_DATA_FILE, 'wb+') as f:
         pickle.dump(user_data, f)
+    save_jobs(job.job_queue)
     logging.info("save data ok")
 
 

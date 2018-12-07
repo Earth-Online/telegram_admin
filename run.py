@@ -13,6 +13,7 @@ from config import LOG_LEVEL, TOKEN, LOG_FILE, CHAT_DATA_FILE, USER_DATA_FILE, D
 from conversation import conv_handle
 from handler import command_handler, set_handler, stop_handler, error_handler, auto_lock_handler, message_handler
 from admin import update_admin_list, update_ban_list
+from tool import load_jobs
 
 f_handler = FileHandler(LOG_FILE)
 logging.basicConfig(
@@ -25,7 +26,7 @@ logger_telegram = logging.getLogger('telegram')
 logger_telegram.setLevel(level=logging.WARN)
 
 
-def loaddata():
+def loaddata(job_queue):
     dispatch = Dispatcher.get_instance()
     try:
         with open(CHAT_DATA_FILE, "rb") as f:
@@ -39,6 +40,10 @@ def loaddata():
             dispatch.user_data = user_data
     except FileNotFoundError:
         logging.warning("user_data file not found")
+    try:
+        load_jobs(job_queue)
+    except FileNotFoundError:
+        logging.warning("job_data file not found")
 
 
 def main():
@@ -51,7 +56,7 @@ def main():
     for command in command_handler:
         logging.debug(f"add {command.command} command")
         dispatcher.add_handler(command)
-    dispatcher.add_handler(set_handler)
+    # dispatcher.add_handler(set_handler)
     dispatcher.add_handler(auto_lock_handler)
     dispatcher.add_handler(conv_handle)
     for message_hand in message_handler:
@@ -61,7 +66,7 @@ def main():
 
     update_admin_list()
     update_ban_list()
-    loaddata()
+    loaddata(updater.job_queue)
     logging.info('run bot')
     updater.start_polling()
     updater.idle()

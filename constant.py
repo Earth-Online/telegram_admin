@@ -112,8 +112,8 @@ class BanMessageType:
     VENUE = 'venue'
     INVOICE = 'Invoice'
     TG_LINK = 'telegramlinks'
-    LANG = 'language'
-    FLOOD = "antiflood"
+    LANG = 'lang'
+    FLOOD = "flood"
     NUMBERS = "numbers"
     GIF = "gif"
     BOLD = "bold"

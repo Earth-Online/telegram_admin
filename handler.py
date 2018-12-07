@@ -8,7 +8,7 @@ from command import (start, run, add_admin, clearwarns, get_id, admins, get_grou
                      globalban, unglobalban, globalban_list, maxwarns, settimeflood, setflood, settings,
                      banword, unbanword, banwords, save, lang, save_data, kick, lock, unlock, autolock,
                      cancel, START_TIME, STOP_TIME, lockstart, lockstop, setmaxmessage, timer, deletetimer,
-                     listtimer)
+                     listtimer, unautolock)
 
 from telegram.ext import ConversationHandler, RegexHandler, MessageHandler
 from message import common_message_handler, telegram_link_handler, limit_set, new_member
@@ -44,6 +44,7 @@ command_handler = [
     lock,
     unlock,
     timer,
+    unautolock,
     deletetimer,
     listtimer,
 ]
@@ -74,5 +75,6 @@ def stop_handler(_, __):
 
 
 def error_handler(bot, update, error):
-    bot.send_message(chat_id=update.message.chat_id, text="a error")
+    if update.messgae:
+        bot.send_message(chat_id=update.message.chat_id, text="a error")
     logging.error(error)

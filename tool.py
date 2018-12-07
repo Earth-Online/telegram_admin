@@ -4,11 +4,17 @@
 module docs
 """
 import logging
+import pickle
+from threading import Event
+from time import time
+
 from telegram import Update, Bot
 from functools import wraps
 from telegram.ext import CommandHandler, MessageHandler, ConversationHandler
 from telegram.ext.dispatcher import DEFAULT_GROUP
 from telegram.utils.promise import Promise
+
+from config import JOB_DATA_FILE
 from constant import RUN, BAN_STATE
 from admin import user_is_admin
 from telegram.ext import Dispatcher
@@ -130,6 +136,61 @@ def get_conv_data():
                 else:
                     resolved[k] = v
             return resolved
+
+
+def save_jobs(jq):
+    if jq:
+        job_tuples = jq._queue.queue
+    else:
+        job_tuples = []
+
+    with open(JOB_DATA_FILE, 'wb') as fp:
+        for next_t, job in job_tuples:
+            # Back up objects
+            _job_queue = job._job_queue
+            _remove = job._remove
+            _enabled = job._enabled
+
+            # Replace un-pickleable threading primitives
+            job._job_queue = None  # Will be reset in jq.put
+            job._remove = job.removed  # Convert to boolean
+            job._enabled = job.enabled  # Convert to boolean
+
+            # Pickle the job
+            pickle.dump((next_t, job), fp)
+
+            # Restore objects
+            job._job_queue = _job_queue
+            job._remove = _remove
+            job._enabled = _enabled
+
+
+def load_jobs(jq):
+    now = time()
+
+    with open(JOB_DATA_FILE, 'rb') as fp:
+        while True:
+            try:
+                next_t, job = pickle.load(fp)
+            except EOFError:
+                break  # Loaded all job tuples
+
+            # Create threading primitives
+            enabled = job._enabled
+            removed = job._remove
+
+            job._enabled = Event()
+            job._remove = Event()
+
+            if enabled:
+                job._enabled.set()
+
+            if removed:
+                job._remove.set()
+
+            next_t -= now  # Convert from absolute to relative time
+
+            jq._put(job, next_t)
 
 
 def word_re(word_list: list):
