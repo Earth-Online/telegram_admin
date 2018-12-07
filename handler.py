@@ -71,7 +71,8 @@ auto_lock_handler = ConversationHandler(
 
 
 def stop_handler(_, __):
-    save_data()
+    pass
+    # save_data()
 
 
 def error_handler(bot, update, error):

@@ -70,6 +70,7 @@ def main():
     logging.info('run bot')
     updater.start_polling()
     updater.idle()
+    save_data(updater.job_queue)
 
 
 if __name__ == "__main__":
