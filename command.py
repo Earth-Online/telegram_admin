@@ -23,7 +23,10 @@ from config import CHAT_DATA_FILE, USER_DATA_FILE, CONV_DATA_FILE
 from constant import START_MSG, ADD_ADMIN_OK_MSG, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN_MSG, ID_MSG, ADMIN_FORMAT, \
     GET_ADMINS_MSG, GROUP_FORMAT, BOT_STOP_MSG, INFO_MSG, GLOBAL_BAN_FORMAT, allow_setting, OK, NO, BANWORD_ERROR, \
     BANWORD_FORMAT, GET_BANWORDS_MSG, SET_OK_MSG, BAN_STATE, START_TIME_MSG, STOP_TIME_MSG, UserData, \
-    ARG_ERROR_MSG, USERID_ERROR_MSG, RunState, NO_INFO_MSG, NUM_ERROR, ChatData, OpenState, OPITON_ERROR
+    ARG_ERROR_MSG, USERID_ERROR_MSG, RunState, NO_INFO_MSG, NUM_ERROR, ChatData, OpenState, OPITON_ERROR, BOT_RUN_MSG, \
+    CLEANWARN_MSG, NO_RUN_MSG, LINK_FORMAT, GLOBAN_BAN_MSG, UNGLOBAN_BAN_MSG, MAXWARN_MSG, TIMEfLOOD_MSG, FLOOD_MSG, \
+    SETTING_MSG, BANWORD_MSG, UNBANWORD_MSG, LANG_MSG, KICK_MSG, LOCK_MSG, UNLOCK_MSG, TIMER_MSG, DELETE_TIMER_MSG, \
+    LISTTIMER_MSG, UNAUTOLOCK_MSG
 from module import DBSession
 from module.group import Group
 from module.user import User
@@ -57,6 +60,7 @@ def ping(bot, update):
 
 
 @command_wrap(name="add", pass_args=True)
+@run_async
 @check_admin()
 def add_admin(bot, update, args):
     """
@@ -83,8 +87,8 @@ def add_admin(bot, update, args):
 
 
 @command_wrap(pass_chat_data=True)
-@check_admin()
 @run_async
+@check_admin()
 def run(bot, update, chat_data):
     """Run bot filter function
     :param bot:
@@ -93,6 +97,9 @@ def run(bot, update, chat_data):
     :type update: Update
     :return:
     """
+    if chat_data.get(ChatData.RUN):
+        bot.send_message(chat_id=update.message.chat_id, text=BOT_RUN_MSG)
+        return
     bot_id = bot.id
     group_info = bot.get_chat_member(update.message.chat_id, bot_id)
     if group_info['status'] != ChatMember.ADMINISTRATOR:
@@ -135,10 +142,13 @@ def clearwarns(bot, update, args):
         for entity in update.message.entities:
             if entity.type == MessageEntity.TEXT_MENTION:
                 user_list.append(entity.user['id'])
+    if not len(user_list):
+        bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
+        return
     user_data = get_user_data()
     for user in user_list:
         user_data[user.id][UserData.WARN] = 0
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=CLEANWARN_MSG)
 
 
 @command_wrap(name='id')
@@ -217,9 +227,11 @@ def stop(bot, update, chat_data):
     :type update: Update
     :return:
     """
+    if not chat_data.get(ChatData.RUN):
+        bot.send_message(chat_id=update.message.chat_id, text=NO_RUN_MSG)
+        return
     chat_data[ChatData.RUN] = False
     bot.send_message(chat_id=update.message.chat_id, text=BOT_STOP_MSG)
-    # return ConversationHandler.END
 
 
 @command_wrap()
@@ -240,7 +252,8 @@ def link(bot, update):
         bot.send_message(chat_id=update.message.chat_id, text="not supergroup")
         return
     group_link = bot.export_chat_invite_link(update.message.chat_id)
-    bot.send_message(chat_id=update.message.chat_id, text=group_link)
+    bot.send_message(chat_id=update.message.chat_id, parse_mode=ParseMode.MARKDOWN,
+                     text=LINK_FORMAT.format(link=group_link))
 
 
 @command_wrap()
@@ -280,7 +293,7 @@ def globalban(bot, update, args):
     if not len(ban_user_list):
         bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
         return
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=GLOBAN_BAN_MSG)
     ban_user(user_list=ban_user_list, ban=True)
     update_ban_list()
 
@@ -307,7 +320,7 @@ def unglobalban(bot, update, args):
         bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
         return
     ban_user(user_list=ban_user_list, ban=False)
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=UNGLOBAN_BAN_MSG)
     update_ban_list()
 
 
@@ -358,7 +371,7 @@ def maxwarns(bot, update, args, chat_data):
     if not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=NUM_ERROR)
     chat_data[ChatData.MAXWARN] = int(args[0])
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=MAXWARN_MSG.format(num=args[0]))
 
 
 @command_wrap(pass_chat_data=True, pass_args=True)
@@ -383,7 +396,7 @@ def settimeflood(bot, update, args, chat_data):
     if not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=NUM_ERROR)
     chat_data[ChatData.FLOOD_TIME] = int(args[0])
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=TIMEfLOOD_MSG.format(num=args[0]))
 
 
 @command_wrap(pass_chat_data=True, pass_args=True)
@@ -407,7 +420,7 @@ def setflood(bot, update, args, chat_data):
     if not args[0].isdigit():
         bot.send_message(update.message.chat_id, text=NUM_ERROR)
     chat_data[ChatData.FLOOD_NUM] = int(args[0])
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=FLOOD_MSG.format(num=args[0]))
 
 
 @command_wrap(pass_chat_data=True, pass_args=True)
@@ -451,7 +464,7 @@ def settings(bot, update, chat_data):
     ret_text = ""
     limit = chat_data.get(BAN_STATE, {})
     for setting in allow_setting:
-        ret_text = ret_text + f"{setting}" + (NO if limit.get(setting) else OK) + "\n"
+        ret_text = ret_text + SETTING_MSG.format(setting=setting, state=(NO if limit.get(setting) else OK))
     bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 
@@ -478,7 +491,7 @@ def banword(bot, update, args, chat_data):
     group_banwords.extend(args)
     chat_data[ChatData.BANWORD] = group_banwords
     chat_data[ChatData.BANWORD_RE] = word_re(group_banwords)
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=BANWORD_MSG.format(word=" ".join(args)))
 
 
 @command_wrap(pass_chat_data=True, pass_args=True)
@@ -507,7 +520,7 @@ def unbanword(bot, update, args, chat_data):
         except ValueError:
             continue
     chat_data[ChatData.BANWORD] = group_banwords
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=UNBANWORD_MSG.format(word=" ".join(args)))
     if not len(group_banwords):
         chat_data[ChatData.BANWORD_RE] = None
         return
@@ -538,9 +551,9 @@ def banwords(bot, update, chat_data):
 
 
 @command_wrap(pass_chat_data=True, pass_args=True)
+@run_async
 @check_admin()
 @check_run()
-# @run_async
 def lang(bot, update, args, chat_data):
     """
     set lang limit
@@ -554,7 +567,7 @@ def lang(bot, update, args, chat_data):
     :return:
     """
     if len(args) < 2:
-        bot.send_message(chat_id=update.message.chat_id, text=BANWORD_ERROR)
+        bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
         return
     ban_list: list = chat_data.get(ChatData.LANG, [])
     if args[1] == OpenState.CLODE:
@@ -567,7 +580,7 @@ def lang(bot, update, args, chat_data):
     else:
         bot.send_message(chat_id=update.message.chat_id, text=OPITON_ERROR)
         return
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=LANG_MSG.format(lang=args[0], state=args[1]))
 
 
 @command_wrap()
@@ -611,7 +624,7 @@ def kick(bot, update, args):
         bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
         return
     kick_user(bot, update, user_list=kick_user_list)
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=KICK_MSG.format(ids=" ".join(kick_user_list)))
 
 
 @command_wrap(pass_args=True, pass_chat_data=True)
@@ -632,7 +645,7 @@ def lock(bot, update, args, chat_data):
         bot.send_message(chat_id=update.message.chat_id, text=NUM_ERROR)
         return
     chat_data[ChatData.LOCKTIME] = datetime.now().timestamp() + int(args[0])
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=LOCK_MSG)
 
 
 @command_wrap(pass_chat_data=True)
@@ -649,10 +662,9 @@ def unlock(bot, update, chat_data):
     :return:
     """
     chat_data[ChatData.LOCKTIME] = None
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=UNLOCK_MSG)
 
 
-START_TIME = 999
 STOP_TIME = 1000
 
 
@@ -696,7 +708,7 @@ def timer(bot, update, job_queue, args):
         return
     job_queue.run_repeating(callback=time_send_msg, context=[args[0], args[1], update.message.chat_id],
                             name=update.message.chat_id, interval=timedelta(days=1), first=time)
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=TIMER_MSG)
 
 
 @command_wrap(pass_job_queue=True)
@@ -718,7 +730,7 @@ def listtimer(bot, update, job_queue):
     ret_text = ""
     for job in jobs:
         if not job.removed:
-            ret_text = ret_text + f"{job.context[0]} {job.context[1]}\n"
+            ret_text = ret_text + LISTTIMER_MSG.format(time=job.context[0], msg=job.context[1])
     if not ret_text:
         bot.send_message(chat_id=update.message.chat_id, text=NO_INFO_MSG)
         return
@@ -738,7 +750,7 @@ def deletetimer(bot, update, job_queue, args):
         bot.send_message(chat_id=update.message.chat_id, text=NUM_ERROR)
         return
     jobs[int(args[0])].schedule_removal()
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=DELETE_TIMER_MSG)
 
 
 @command_wrap(pass_chat_data=True)
@@ -755,7 +767,7 @@ def unautolock(bot, update, chat_data):
     """
     chat_data[ChatData.AUTO_LOOK_START] = None
     chat_data[ChatData.AUTO_LOOK_STOP] = None
-    bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
+    bot.send_message(chat_id=update.message.chat_id, text=UNAUTOLOCK_MSG)
 
 
 @command_wrap()
@@ -784,15 +796,15 @@ def lockstart(bot, update, chat_data):
     """
     if not update.message.text:
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
-        return START_TIME
+        return RunState.START_TIME
     try:
         time = datetime.strptime(update.message.text, "%H:%M")
     except ValueError:
         update.message.reply_text(text=START_TIME_MSG, reply_markup=ForceReply())
-        return START_TIME
+        return RunState.START_TIME
     chat_data[ChatData.AUTO_LOOK_START] = time
     update.message.reply_text(text=STOP_TIME_MSG, reply_markup=ForceReply())
-    return STOP_TIME
+    return RunState.STOP_TIME
 
 
 @messaage_warp(filters=Filters.all, pass_chat_data=True)
