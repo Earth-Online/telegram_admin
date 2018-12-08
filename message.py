@@ -5,7 +5,7 @@ handle massage
 """
 import filter
 from admin import user_is_ban
-from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType, RUN, BAN_STATE, OpenState, OPITON_ERROR
+from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType, BAN_STATE, OpenState, OPITON_ERROR
 from telegram import Update, Bot
 from telegram.ext.dispatcher import run_async
 from tool import messaage_warp, check_admin, kick_user, check_run, check_ban_state
@@ -31,7 +31,6 @@ def telegram_link_handler(bot, update, user_data, chat_data):
     """
     update.message.delete()
     warn_user(bot, update, user_data, chat_data)
-    return RUN
 
 
 @messaage_warp(filters=(filter.Run() & Filters.group & Filters.all & ~filter.Admin() & ~filter.GroupAdmin()),
@@ -54,18 +53,18 @@ def common_message_handler(bot, update, user_data, chat_data):
         if getattr(update.message, ban_type, False):
             update.message.delete()
             warn_user(bot, update, user_data, chat_data)
-            return RUN
+            return
     if update.message.entities:
         for entity in update.message.entities:
             if entity.type in ban_state.keys():
                 update.message.delete()
                 warn_user(bot, update, user_data, chat_data)
-            return RUN
+            return
     if ban_state.get('all'):
         update.message.delete()
         warn_user(bot, update, user_data, chat_data)
-        return RUN
-    return RUN
+        return
+    return
 
 
 @check_admin(admin=True)
@@ -99,7 +98,7 @@ def limit_set(bot, update, chat_data, groups):
             bot.send_message(update.message.chat_id, text=OPITON_ERROR)
             return
     bot.send_message(update.message.chat_id, text=SET_OK_MSG)
-    return RUN
+    return
 
 
 @messaage_warp(filters=filter.NewMember())
@@ -110,7 +109,7 @@ def new_member(bot, update):
     for members in update.message.new_chat_members:
         if user_is_ban(members.id):
             kick_user(bot=bot, update=update, user_list=[members.id])
-    return RUN
+    return
 
 
 def warn_user(bot, update, user_data, chat_data):

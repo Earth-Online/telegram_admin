@@ -15,7 +15,7 @@ from telegram.ext.dispatcher import DEFAULT_GROUP
 from telegram.utils.promise import Promise
 
 from config import JOB_DATA_FILE
-from constant import RUN, BAN_STATE
+from constant import BAN_STATE
 from admin import user_is_admin
 from telegram.ext import Dispatcher
 from re import compile

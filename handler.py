@@ -77,6 +77,6 @@ def stop_handler(_, __):
 
 
 def error_handler(bot, update, error):
-    if update.message:
+    if update:
         bot.send_message(chat_id=update.message.chat_id, text="a error")
     logging.error(error)
