@@ -5,7 +5,7 @@ handle massage
 """
 import filter
 from admin import user_is_ban
-from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType, RUN, BAN_STATE
+from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType, RUN, BAN_STATE, OpenState, OPITON_ERROR
 from telegram import Update, Bot
 from telegram.ext.dispatcher import run_async
 from tool import messaage_warp, check_admin, kick_user, check_run
@@ -75,20 +75,29 @@ def limit_set(bot, update, chat_data, groups):
     if not chat_data.get('ban_state'):
         chat_data['ban_state'] = {}
 
+    if not groups[1].isalpha():
+        groups[1] = groups[1][1:]
+
     if LIMIT_DICT.get(groups[0]):
         limits = LIMIT_DICT.get(groups[0])
         for limit in limits:
-            if groups[1] == "on":
+            if groups[1] == OpenState.OPEN:
                 if chat_data['ban_state'].get(limit):
                     chat_data['ban_state'].pop(limit)
-            else:
+            elif groups[1] == OpenState.CLODE:
                 chat_data['ban_state'][limit] = groups[1]
+            else:
+                bot.send_message(update.message.chat_id, text=OPITON_ERROR)
+                return
     else:
-        if groups[1] == "on":
+        if groups[1] == OpenState.OPEN:
             if chat_data['ban_state'].get(groups[0]):
                 chat_data['ban_state'].pop(groups[0])
-        else:
+        elif groups[1] == OpenState.CLODE:
             chat_data['ban_state'][groups[0]] = True
+        else:
+            bot.send_message(update.message.chat_id, text=OPITON_ERROR)
+            return
     bot.send_message(update.message.chat_id, text=SET_OK_MSG)
     return RUN
 
@@ -96,6 +105,7 @@ def limit_set(bot, update, chat_data, groups):
 @messaage_warp(filters=filter.NewMember())
 @run_async
 def new_member(bot, update):
+    update.message.delete()
     for members in update.message.new_chat_members:
         if user_is_ban(members.id):
             kick_user(bot=bot, update=update, user_list=[members.id])

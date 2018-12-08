@@ -7,12 +7,12 @@ import logging
 from command import (start, run, add_admin, clearwarns, get_id, admins, get_groups, link, stop, info,
                      globalban, unglobalban, globalban_list, maxwarns, settimeflood, setflood, settings,
                      banword, unbanword, banwords, save, lang, save_data, kick, lock, unlock, autolock,
-                     cancel, START_TIME, STOP_TIME, lockstart, lockstop, setmaxmessage, timer, deletetimer,
+                     cancel, lockstart, lockstop, setmaxmessage, timer, deletetimer,
                      listtimer, unautolock, ping)
 
 from telegram.ext import ConversationHandler, RegexHandler, MessageHandler
 from message import common_message_handler, telegram_link_handler, limit_set, new_member
-from constant import RUN, STOP, SETTING_RE
+from constant import SETTING_RE, RunState
 
 set_handler = RegexHandler(callback=limit_set, pattern=SETTING_RE, pass_chat_data=True, pass_groups=True)
 
@@ -60,10 +60,10 @@ message_handler = [
 auto_lock_handler = ConversationHandler(
     entry_points=[autolock],
     states={
-        START_TIME: [
+        RunState.START_TIME: [
             lockstart
         ],
-        STOP_TIME: [
+        RunState.STOP_TIME: [
             lockstop
         ]
     },

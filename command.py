@@ -26,7 +26,7 @@ from constant import START_MSG, ADD_ADMIN_OK_MSG, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN
     ARG_ERROR_MSG, USERID_ERROR_MSG, RunState, NO_INFO_MSG, NUM_ERROR, ChatData, OpenState, OPITON_ERROR, BOT_RUN_MSG, \
     CLEANWARN_MSG, NO_RUN_MSG, LINK_FORMAT, GLOBAN_BAN_MSG, UNGLOBAN_BAN_MSG, MAXWARN_MSG, TIMEfLOOD_MSG, FLOOD_MSG, \
     SETTING_MSG, BANWORD_MSG, UNBANWORD_MSG, LANG_MSG, KICK_MSG, LOCK_MSG, UNLOCK_MSG, TIMER_MSG, DELETE_TIMER_MSG, \
-    LISTTIMER_MSG, UNAUTOLOCK_MSG
+    LISTTIMER_MSG, UNAUTOLOCK_MSG, LANG_DICT
 from module import DBSession
 from module.group import Group
 from module.user import User
@@ -569,6 +569,10 @@ def lang(bot, update, args, chat_data):
     if len(args) < 2:
         bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
         return
+    if args[0] not in list(LANG_DICT.keys()):
+        bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
+        return
+    args[0] = LANG_DICT.get(args[0])
     ban_list: list = chat_data.get(ChatData.LANG, [])
     if args[1] == OpenState.CLODE:
         ban_list.append(args[0])
@@ -665,7 +669,6 @@ def unlock(bot, update, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=UNLOCK_MSG)
 
 
-STOP_TIME = 1000
 
 
 @command_wrap()

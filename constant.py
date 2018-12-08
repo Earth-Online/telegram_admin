@@ -44,7 +44,7 @@ CLEANWARN_MSG = "clearn warn ok"
 
 # /id msg  {user_id} is user id {group_id} is group id. not change it. {xxx} Also please don't change it
 ID_MSG = """
-🔸 your id : {user_id}
+🔸 your id : {user_id}LINKTEXT 
 🔹 group id : {group_id}
 """
 
@@ -147,16 +147,12 @@ NO_SUPPORT_FORMAT = "not support format"
 USER_FORWARD_START = "Send The Message Now"
 USER_FORWARD_STOP = "Done Send message to all"
 
-
 ADMIN = "administrator"
 
 SET_OK_MSG = "setting ok"
 
 NO_GET_USENAME_MSG = """Warning: Due to api restrictions, usernames cannot be obtained from user_id.The user name of 
 this user will not be included in the added data. """
-
-RUN = 1
-STOP = 0
 
 MAXWARNS_ERROR = "command error.command usage: /maxwarns <num>"
 BANWORD_ERROR = "command error.command usage: /banword <banword>"
@@ -185,7 +181,7 @@ class BanMessageType:
     DOCS = 'document'
     TEXT = 'text'
     ALL = 'all'
-    FORWARD = 'forward'
+    FORWARD = 'forward_date'
     GAME = 'game'
     STICKER = 'sticker'
     CONTACT = 'contact'
@@ -201,8 +197,8 @@ class BanMessageType:
     ITALIC = "italic"
     CODE = "code"
     TEXT_LINK = 'text_link'
-    LINKTEXT = "linktext"
-    MARKDOWN = "markdown"
+    #   LINKTEXT = "linktext"
+    #   MARKDOWN = "markdown"
     EMOJI = "emoji"
     HASHTAG = "hashtag"
     MENTION = "mention"
@@ -211,6 +207,20 @@ class BanMessageType:
     URL = "url"
     VIDEONOTE = "videonote"
     LINK = "link"
+
+
+LIMIT_DICT = {
+    # add it.  format word:[open limit] example "urllimit":[BanMessageType.URL],
+    # if you not add one limit line. will Unable to set a limit
+    "markdown": [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL],
+    BanMessageType.LINK: [BanMessageType.URL, BanMessageType.TEXT_LINK],
+    'الفيديو': [BanMessageType.VIDEO]
+}
+
+LANG_DICT = {
+    # add it. if you not add one limit line. will Unable to set a limit
+    "englist": "en",
+}
 
 
 class UserData:
@@ -234,31 +244,14 @@ class ChatData:
     RUN = "run"
 
 
-LIMIT_DICT = {
-    BanMessageType.MARKDOWN: [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL],
-    BanMessageType.FORWARD: ["forward_date"],
-    BanMessageType.LINK: [BanMessageType.URL, BanMessageType.TEXT_LINK]
-}
-
-
-class GetLimit(dict):
-    limit_dict = {
-        BanMessageType.MARKDOWN: [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL]
-    }
-
-    def __getitem__(self, item):
-        return self.limit_dict.get(item)
-
-    def __missing__(self, key):
-        return getattr(BanMessageType, key)
-
-
 TELEGRAM_DOMAIN = ["t.me", "telegram.me"]
 MARKDOWN_BAN = [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL]
-allow_setting = [BanMessageType.__dict__[key] for key in filter(lambda x: x[0] != "_", BanMessageType.__dict__)]
+# allow_setting = [BanMessageType.__dict__[key] for key in filter(lambda x: x[0] != "_", BanMessageType.__dict__)]
+# allow_setting = allow_setting + list(LIMIT_DICT.keys())
+allow_setting = list(LIMIT_DICT.keys())
 
 allow_str = "|".join(allow_setting)
-SETTING_RE = re.compile(f"^({allow_str})\\s+(on|off)$")
+SETTING_RE = re.compile(f"^[!|#|/]*({allow_str})\\s+(on|off)$")
 NUM_RE = re.compile(r"\d")
 
 BANWORD_KEY = "banwordre"
