@@ -669,8 +669,6 @@ def unlock(bot, update, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=UNLOCK_MSG)
 
 
-
-
 @command_wrap()
 @check_admin()
 @check_run()

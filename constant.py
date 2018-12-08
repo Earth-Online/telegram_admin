@@ -197,6 +197,7 @@ class BanMessageType:
     ITALIC = "italic"
     CODE = "code"
     TEXT_LINK = 'text_link'
+    MAXMSG = "maxmsg"
     #   LINKTEXT = "linktext"
     #   MARKDOWN = "markdown"
     EMOJI = "emoji"
@@ -207,6 +208,7 @@ class BanMessageType:
     URL = "url"
     VIDEONOTE = "videonote"
     LINK = "link"
+    ADDGROUP = "addgroup"
 
 
 LIMIT_DICT = {

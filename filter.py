@@ -64,10 +64,11 @@ class Lang(BaseFilter):
 class MaxMsg(BaseFilter):
 
     def filter(self, message):
+        if not check_ban_state(message.chat_id, BanMessageType.MAXMSG):
+            return False
         chat_data: dict = get_chat_data(chat_id=message.chat_id)
         if not chat_data.get(ChatData.MAXFLOOD):
             return False
-
         user_data = get_user_data(message.from_user.id)
         if not user_data.get(UserData.MAXMSG_DATA):
             user_data[UserData.MAXMSG_DATA] = {}

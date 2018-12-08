@@ -8,7 +8,7 @@ from admin import user_is_ban
 from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType, RUN, BAN_STATE, OpenState, OPITON_ERROR
 from telegram import Update, Bot
 from telegram.ext.dispatcher import run_async
-from tool import messaage_warp, check_admin, kick_user, check_run
+from tool import messaage_warp, check_admin, kick_user, check_run, check_ban_state
 from telegram.ext.filters import Filters
 
 
@@ -105,7 +105,8 @@ def limit_set(bot, update, chat_data, groups):
 @messaage_warp(filters=filter.NewMember())
 @run_async
 def new_member(bot, update):
-    update.message.delete()
+    if check_ban_state(update.message.chat_id, BanMessageType.ADDGROUP):
+        update.message.delete()
     for members in update.message.new_chat_members:
         if user_is_ban(members.id):
             kick_user(bot=bot, update=update, user_list=[members.id])
