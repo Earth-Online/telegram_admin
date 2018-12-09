@@ -76,7 +76,6 @@ def limit_set(bot, update, chat_data, groups):
 
     if not groups[1].isalpha():
         groups[1] = groups[1][1:]
-
     if LIMIT_DICT.get(groups[0]):
         limits = LIMIT_DICT.get(groups[0])
         for limit in limits:
