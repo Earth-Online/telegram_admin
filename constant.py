@@ -216,12 +216,11 @@ LIMIT_DICT = {
     # if you not add one limit line. will Unable to set a limit
     "markdown": [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL],
     BanMessageType.LINK: [BanMessageType.URL, BanMessageType.TEXT_LINK],
-    'الفيديو': [BanMessageType.VIDEO]
 }
 
 LANG_DICT = {
     # add it. if you not add one limit line. will Unable to set a limit
-    "englist": "en",
+    "english": "en",
 }
 
 

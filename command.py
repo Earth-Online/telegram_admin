@@ -59,7 +59,7 @@ def ping(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=pingtime)
 
 
-@command_wrap(name="add", pass_args=True)
+@command_wrap(name="مطور", pass_args=True)
 @run_async
 @check_admin()
 def add_admin(bot, update, args):
@@ -86,7 +86,7 @@ def add_admin(bot, update, args):
     bot.send_message(chat_id=update.message.chat_id, text=ADD_ADMIN_OK_MSG)
 
 
-@command_wrap(pass_chat_data=True)
+@command_wrap(pass_chat_data=True, name="تفعيل")
 @run_async
 @check_admin()
 def run(bot, update, chat_data):
@@ -151,7 +151,7 @@ def clearwarns(bot, update, args):
     bot.send_message(chat_id=update.message.chat_id, text=CLEANWARN_MSG)
 
 
-@command_wrap(name='id')
+@command_wrap(name='ايدي')
 @run_async
 def get_id(bot, update):
     """
@@ -167,7 +167,7 @@ def get_id(bot, update):
                      )
 
 
-@command_wrap()
+@command_wrap(name="المشرفين")
 @run_async
 def admins(bot, update):
     """
@@ -189,7 +189,7 @@ def admins(bot, update):
                      parse_mode=ParseMode.MARKDOWN)
 
 
-@command_wrap(name="groups")
+@command_wrap(name="المجموعات")
 @check_admin()
 @run_async
 def get_groups(bot, update):
@@ -214,13 +214,14 @@ def get_groups(bot, update):
     session.close()
 
 
-@command_wrap(pass_chat_data=True)
+@command_wrap(pass_chat_data=True, name="تعطيل")
 @check_admin()
 @check_run()
 @run_async
 def stop(bot, update, chat_data):
     """
     Stop bot filer function
+    :param chat_data:
     :param bot:
     :type bot: Bot
     :param update:
@@ -234,7 +235,7 @@ def stop(bot, update, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=BOT_STOP_MSG)
 
 
-@command_wrap()
+@command_wrap(name="الرابط")
 @check_admin()
 @check_run()
 @run_async
@@ -256,7 +257,7 @@ def link(bot, update):
                      text=LINK_FORMAT.format(link=group_link))
 
 
-@command_wrap()
+@command_wrap(name="معلومات")
 @run_async
 def info(bot, update):
     """
