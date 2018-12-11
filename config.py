@@ -26,6 +26,6 @@ DB_URL = 'sqlite:///data/test.db'
 
 DEFAULT_CHECK_TIME = 5 * 60
 # firse admin
-ADMIN = [529436356]
+ADMIN = [os.environ.get('admin')] 
 
 SEND_SLEEP = 1
