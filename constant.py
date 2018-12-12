@@ -280,7 +280,7 @@ class ChatData:
 
 TELEGRAM_DOMAIN = ["t.me", "telegram.me"]
 MARKDOWN_BAN = [BanMessageType.BOLD, BanMessageType.ITALIC, BanMessageType.CODE, BanMessageType.URL]
-# allow_setting = [BanMessageType.__dict__[key] for key in filter(lambda x: x[0] != "_", BanMessageType.__dict__)]
+e_allow_setting = [BanMessageType.__dict__[key] for key in filter(lambda x: x[0] != "_", BanMessageType.__dict__)]
 # allow_setting = allow_setting + list(LIMIT_DICT.keys())
 allow_setting = list(LIMIT_DICT.keys())
 

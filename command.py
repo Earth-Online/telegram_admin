@@ -26,7 +26,7 @@ from constant import START_MSG, ADD_ADMIN_OK_MSG, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN
     ARG_ERROR_MSG, USERID_ERROR_MSG, RunState, NO_INFO_MSG, NUM_ERROR, ChatData, OpenState, OPITON_ERROR, BOT_RUN_MSG, \
     CLEANWARN_MSG, NO_RUN_MSG, LINK_FORMAT, GLOBAN_BAN_MSG, UNGLOBAN_BAN_MSG, MAXWARN_MSG, TIMEfLOOD_MSG, FLOOD_MSG, \
     SETTING_MSG, BANWORD_MSG, UNBANWORD_MSG, LANG_MSG, KICK_MSG, LOCK_MSG, UNLOCK_MSG, TIMER_MSG, DELETE_TIMER_MSG, \
-    LISTTIMER_MSG, UNAUTOLOCK_MSG, LANG_DICT
+    LISTTIMER_MSG, UNAUTOLOCK_MSG, LANG_DICT, e_allow_setting, LIMIT_DICT
 from module import DBSession
 from module.group import Group
 from module.user import User
@@ -463,10 +463,14 @@ def settings(bot, update, chat_data):
     :type update: Update
     :return:
     """
+
     ret_text = ""
     limit = chat_data.get(BAN_STATE, {})
     for setting in allow_setting:
-        ret_text = ret_text + SETTING_MSG.format(setting=setting, state=(NO if limit.get(setting) else OK))
+        state = OK
+        if all([limit.get(i) for i in LIMIT_DICT.get(setting)]):
+            state = NO
+        ret_text = ret_text + SETTING_MSG.format(setting=setting,state=state)
     bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 

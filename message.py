@@ -71,11 +71,12 @@ def common_message_handler(bot, update, user_data, chat_data):
 @check_run()
 @run_async
 def limit_set(bot, update, chat_data, groups):
+
+
     if not chat_data.get('ban_state'):
         chat_data['ban_state'] = {}
-
-    if not groups[1].isalpha():
-        groups[1] = groups[1][1:]
+    if groups[0] in ["#", "/", "!"]:
+        groups[0] = groups[0][1:]
     if LIMIT_DICT.get(groups[0]):
         limits = LIMIT_DICT.get(groups[0])
         for limit in limits:
