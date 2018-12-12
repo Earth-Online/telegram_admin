@@ -67,7 +67,7 @@ def check_admin(admin=True):
             """
             user = update.message.from_user
             if user_is_admin(user.id) != admin:
-                bot.send_message(chat_id=update.message.chat_id, text="you not admin")
+                bot.send_message(chat_id=update.message.chat_id, text="انت لست مشرف")
                 return
             return func(bot, update, *args, **kwargs)
 

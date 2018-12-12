@@ -32,7 +32,20 @@ from module.group import Group
 from module.user import User
 from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data, kick_user, \
     messaage_warp, check_run, time_send_msg, save_jobs
+import filter
+from str import help_msg, sudo_msg
 
+
+@command_wrap(name="الاوامر", filters=(filter.GroupAdmin()| filter.Admin())) 
+@run_async
+def help(bot, update):
+
+    bot.send_message(chat_id=update.message.chat_id, text=help_msg)
+
+@command_wrap(name="المطورين", filters=(filter.Admin()))
+@run_async
+def sudo(bot, update):
+    bot.send_message(chat_id=update.message.chat_id, text=sudo_msg)
 
 @command_wrap()
 @run_async
