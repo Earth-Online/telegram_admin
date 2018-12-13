@@ -650,6 +650,7 @@ def kick(bot, update, args):
         bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
         return
     kick_user(bot, update, user_list=kick_user_list)
+    kick_user_list = [str(user) for  user in kick_user_list]
     bot.send_message(chat_id=update.message.chat_id, text=KICK_MSG.format(ids=" ".join(kick_user_list)))
 
 
@@ -883,6 +884,7 @@ def vipuser(bot, update, args, chat_data):
     user_list = chat_data.get(ChatData.VIPUSER, [])
     user_list.extend(vip_user_list)
     chat_data[ChatData.VIPUSER] = user_list
+    vip_user_list = [str(user) for user in vip_user_list]
     bot.send_message(chat_id=update.message.chat_id, text=VIPUSER_MSG.format(ids=" ".join(vip_user_list)))
 
 

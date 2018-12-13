@@ -56,9 +56,7 @@ def main():
     dispatcher = updater.dispatcher
     job = updater.job_queue
     for command in command_handler:
-        logging.debug(f"add {command.command} command")
         dispatcher.add_handler(command)
-    # dispatcher.add_handler(set_handler)
     dispatcher.add_handler(auto_lock_handler)
     dispatcher.add_handler(conv_handle)
     dispatcher.add_handler(extra_conv)

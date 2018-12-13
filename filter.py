@@ -208,6 +208,8 @@ class VipUser(BaseFilter):
 
 class TopMsg(BaseFilter):
     def filter(self, message):
+        if not message.text:
+            return True
         session = DBSession()
         sentence = session.query(Sentence).filter_by(sentence=message.text).first()
         if sentence is None:
