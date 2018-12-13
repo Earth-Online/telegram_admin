@@ -28,16 +28,17 @@ def command_wrap(name: str = "", pass_chat_data=False, pass_user_data=False, pas
     """
 
     def decorator(func):
-        def wrapper(groups, *args, **kwargs):
+        def wrapper(*args, **kwargs):
+
             ret = None
-            logging.debug(f"call {func.__name__} ")
-            arg = groups[0].split(" ")
+            arg = kwargs['groups'][0].split(" ")
+            kwargs.pop('groups')
             try:
                 ret = func(args=arg, *args, **kwargs)
             except Exception as e:
                 logging.error(e)
             return ret
-        return RegexHandler(pattern=f"^/{name or func.__name__}(.*)", callback=wrapper, pass_chat_data=pass_chat_data,
+        return RegexHandler(pattern=f"^/{name or func.__name__}\s*(.*)", callback=wrapper, pass_chat_data=pass_chat_data,
                             pass_user_data=pass_user_data,pass_groups=True, **kwargs)
 
     return decorator
