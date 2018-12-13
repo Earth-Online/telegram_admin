@@ -16,7 +16,7 @@ from telegram.utils.promise import Promise
 
 from config import JOB_DATA_FILE
 from constant import BAN_STATE
-from admin import user_is_admin
+from admin import user_is_admin, get_groupadmin
 from telegram.ext import Dispatcher
 from re import compile
 from constant import ChatData, NO_RUN_MSG
@@ -67,6 +67,27 @@ def check_admin(admin=True):
             """
             user = update.message.from_user
             if user_is_admin(user.id) != admin:
+                bot.send_message(chat_id=update.message.chat_id, text="انت لست مشرف")
+                return
+            return func(bot, update, *args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def check_admin_or_group_admin(admin=True):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(bot, update, *args, **kwargs):
+            """
+            :param bot:
+            :type bot: Bot
+            :param update:
+            :type update:Update
+            """
+            user = update.message.from_user
+            if user_is_admin(user.id) != admin or not update.message.from_user['id'] in get_groupadmin(update.message.chat_id):
                 bot.send_message(chat_id=update.message.chat_id, text="انت لست مشرف")
                 return
             return func(bot, update, *args, **kwargs)

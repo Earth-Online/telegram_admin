@@ -31,18 +31,20 @@ from module import DBSession, Sentence
 from module.group import Group
 from module.user import User
 from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data, kick_user, \
-    messaage_warp, check_run, time_send_msg, save_jobs
+    messaage_warp, check_run, time_send_msg, save_jobs, check_admin_or_group_admin
 import filter
 from str import help_msg, sudo_msg
 
 
-@command_wrap(name="الاوامر", filters=(filter.GroupAdmin() | filter.Admin()))
+@command_wrap(name="الاوامر")
+@check_admin_or_group_admin()
 @run_async
 def help(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=help_msg)
 
 
-@command_wrap(name="المطورين", filters=(filter.Admin()))
+@command_wrap(name="المطورين")
+@check_admin()
 @run_async
 def sudo(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=sudo_msg)
@@ -439,9 +441,10 @@ def setflood(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=FLOOD_MSG.format(num=args[0]))
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, name="تعيين_الرسائل", filters=(filter.GroupAdmin() | filter.Admin()))
+@command_wrap(pass_chat_data=True, pass_args=True, name="تعيين_الرسائل")
 @check_run()
 @run_async
+@check_admin_or_group_admin()
 def setmaxmessage(bot, update, args, chat_data):
     """
     :param args:
@@ -852,9 +855,10 @@ def lockstop(bot, update, chat_data):
     return ConversationHandler.END
 
 
-@command_wrap(pass_args=True, pass_chat_data=True, filters=(filter.GroupAdmin() | filter.Admin()))
+@command_wrap(pass_args=True, pass_chat_data=True)
 @check_run()
 @run_async
+@check_admin_or_group_admin()
 def vipuser(bot, update, args, chat_data):
     """
     :param chat_data:
@@ -882,7 +886,8 @@ def vipuser(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=VIPUSER_MSG.format(ids=" ".join(vip_user_list)))
 
 
-@command_wrap(filters=(filter.GroupAdmin() | filter.Admin()))
+@command_wrap()
+@check_admin_or_group_admin()
 def topuser(bot, update):
     """
     :param bot:
