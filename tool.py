@@ -10,7 +10,7 @@ from time import time
 
 from telegram import Update, Bot
 from functools import wraps
-from telegram.ext import CommandHandler, MessageHandler, ConversationHandler
+from telegram.ext import CommandHandler, MessageHandler, ConversationHandler, RegexHandler
 from telegram.ext.dispatcher import DEFAULT_GROUP
 from telegram.utils.promise import Promise
 
@@ -28,17 +28,17 @@ def command_wrap(name: str = "", pass_chat_data=False, pass_user_data=False, pas
     """
 
     def decorator(func):
-        def wrapper(*args, **kwargs):
+        def wrapper(groups, *args, **kwargs):
             ret = None
             logging.debug(f"call {func.__name__} ")
+            arg = groups[0].split(" ")
             try:
-                ret = func(*args, **kwargs)
+                ret = func(args=arg, *args, **kwargs)
             except Exception as e:
                 logging.error(e)
             return ret
-
-        return CommandHandler(name or func.__name__, pass_chat_data=pass_chat_data, pass_user_data=pass_user_data,
-                              pass_args=pass_args, callback=wrapper, **kwargs)
+        return RegexHandler(pattern=f"^/{name or func.__name__}(.*)", callback=wrapper, pass_chat_data=pass_chat_data,
+                            pass_user_data=pass_user_data,pass_groups=True, **kwargs)
 
     return decorator
 
