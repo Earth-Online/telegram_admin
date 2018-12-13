@@ -8,10 +8,10 @@ from command import (start, run, add_admin, clearwarns, get_id, admins, get_grou
                      globalban, unglobalban, globalban_list, maxwarns, settimeflood, setflood, settings,
                      banword, unbanword, banwords, save, lang, save_data, kick, lock, unlock, autolock,
                      cancel, lockstart, lockstop, setmaxmessage, timer, deletetimer,
-                     listtimer, unautolock, ping, help, sudo)
+                     listtimer, unautolock, ping, help, sudo, vipuser)
 
 from telegram.ext import ConversationHandler, RegexHandler, MessageHandler
-from message import common_message_handler, telegram_link_handler, limit_set, new_member
+from message import common_message_handler, telegram_link_handler, limit_set, new_member, extra_message_handle
 from constant import SETTING_RE, RunState
 
 set_handler = RegexHandler(callback=limit_set, pattern=SETTING_RE, pass_chat_data=True, pass_groups=True)
@@ -49,13 +49,15 @@ command_handler = [
     listtimer,
     ping,
     help,
-    sudo
+    sudo,
+    vipuser
 ]
 
 message_handler = [
     set_handler,
     telegram_link_handler,
     new_member,
+    extra_message_handle,
     common_message_handler,
 ]
 

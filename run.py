@@ -14,6 +14,7 @@ from conversation import conv_handle
 from handler import command_handler, set_handler, stop_handler, error_handler, auto_lock_handler, message_handler
 from admin import update_admin_list, update_ban_list
 from tool import load_jobs
+from extra import extra_conv
 
 f_handler = FileHandler(LOG_FILE)
 logging.basicConfig(
@@ -60,6 +61,7 @@ def main():
     # dispatcher.add_handler(set_handler)
     dispatcher.add_handler(auto_lock_handler)
     dispatcher.add_handler(conv_handle)
+    dispatcher.add_handler(extra_conv)
     for message_hand in message_handler:
         dispatcher.add_handler(message_hand)
     dispatcher.add_error_handler(error_handler)

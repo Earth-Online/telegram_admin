@@ -197,3 +197,20 @@ class AutoLock(BaseFilter):
 class GroupAdmin(BaseFilter):
     def filter(self, message):
         return message.from_user['id'] in get_groupadmin(message.chat_id)
+
+
+class VipUser(BaseFilter):
+    def filter(self, message):
+        chat_data = get_chat_data(message.chat_id)
+        return message.from_user['id'] in chat_data.get(ChatData.VIPUSER, [])
+
+
+class TopMsg(BaseFilter):
+    def filter(self, message):
+        pass
+
+
+class Extra(BaseFilter):
+    def filter(self, message):
+        chat_data = get_chat_data()
+        return  message.text in chat_data[ChatData.EXTRA].keys()

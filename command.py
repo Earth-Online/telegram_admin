@@ -26,7 +26,7 @@ from constant import START_MSG, ADD_ADMIN_OK_MSG, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN
     ARG_ERROR_MSG, USERID_ERROR_MSG, RunState, NO_INFO_MSG, NUM_ERROR, ChatData, OpenState, OPITON_ERROR, BOT_RUN_MSG, \
     CLEANWARN_MSG, NO_RUN_MSG, LINK_FORMAT, GLOBAN_BAN_MSG, UNGLOBAN_BAN_MSG, MAXWARN_MSG, TIMEfLOOD_MSG, FLOOD_MSG, \
     SETTING_MSG, BANWORD_MSG, UNBANWORD_MSG, LANG_MSG, KICK_MSG, LOCK_MSG, UNLOCK_MSG, TIMER_MSG, DELETE_TIMER_MSG, \
-    LISTTIMER_MSG, UNAUTOLOCK_MSG, LANG_DICT, e_allow_setting, LIMIT_DICT
+    LISTTIMER_MSG, UNAUTOLOCK_MSG, LANG_DICT, e_allow_setting, LIMIT_DICT, VIPUSER_MSG
 from module import DBSession
 from module.group import Group
 from module.user import User
@@ -36,16 +36,17 @@ import filter
 from str import help_msg, sudo_msg
 
 
-@command_wrap(name="الاوامر", filters=(filter.GroupAdmin()| filter.Admin())) 
+@command_wrap(name="الاوامر", filters=(filter.GroupAdmin() | filter.Admin()))
 @run_async
 def help(bot, update):
-
     bot.send_message(chat_id=update.message.chat_id, text=help_msg)
+
 
 @command_wrap(name="المطورين", filters=(filter.Admin()))
 @run_async
 def sudo(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=sudo_msg)
+
 
 @command_wrap()
 @run_async
@@ -438,8 +439,7 @@ def setflood(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=FLOOD_MSG.format(num=args[0]))
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, name="تعيين_الرسائل")
-@check_admin()
+@command_wrap(pass_chat_data=True, pass_args=True, name="تعيين_الرسائل", filters=(filter.GroupAdmin() | filter.Admin()))
 @check_run()
 @run_async
 def setmaxmessage(bot, update, args, chat_data):
@@ -483,7 +483,7 @@ def settings(bot, update, chat_data):
         state = OK
         if all([limit.get(i) for i in LIMIT_DICT.get(setting)]):
             state = NO
-        ret_text = ret_text + SETTING_MSG.format(setting=setting,state=state)
+        ret_text = ret_text + SETTING_MSG.format(setting=setting, state=state)
     bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 
@@ -850,6 +850,36 @@ def lockstop(bot, update, chat_data):
     chat_data[ChatData.AUTO_LOOK_STOP] = locktime
     bot.send_message(chat_id=update.message.chat_id, text=SET_OK_MSG)
     return ConversationHandler.END
+
+
+@command_wrap(pass_args=True, pass_chat_data=True, filters=(filter.GroupAdmin() | filter.Admin()))
+@check_run()
+@run_async
+def vipuser(bot, update, args, chat_data):
+    """
+    :param chat_data:
+    :param args:
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    vip_user_list = []
+    for _ in args:
+        if _.isdigit():
+            vip_user_list.append(int(_))
+    if update.message.reply_to_message:
+        vip_user_list.append(update.message.reply_to_message.from_user['id'])
+    ban_users = update.message.parse_entities(types=MessageEntity.TEXT_MENTION)
+    vip_user_list.extend([user.user['id'] for user in ban_users.keys()])
+    if not len(vip_user_list):
+        bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
+        return
+    user_list = chat_data.get(ChatData.VIPUSER, [])
+    user_list.extend(vip_user_list)
+    chat_data[ChatData.VIPUSER] = user_list
+    bot.send_message(chat_id=update.message.chat_id, text=VIPUSER_MSG.format(ids=" ".join(vip_user_list)))
 
 
 def save_data(bot=None, job=None):

@@ -5,19 +5,20 @@ handle massage
 """
 import filter
 from admin import user_is_ban
-from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType, BAN_STATE, OpenState, OPITON_ERROR
+from constant import WARN_MSG, SET_OK_MSG, LIMIT_DICT, BanMessageType, BAN_STATE, OpenState, OPITON_ERROR, ChatData
 from telegram import Update, Bot
 from telegram.ext.dispatcher import run_async
-from tool import messaage_warp, check_admin, kick_user, check_run, check_ban_state
+from tool import messaage_warp, check_admin, kick_user, check_run, check_ban_state, get_chat_data
 from telegram.ext.filters import Filters
 
 
-@messaage_warp(filters=filter.Run() & Filters.group & (~filter.Admin()) & (~filter.GroupAdmin()) & (
-        filter.TelegramLink() | filter.Lang() | filter.Flood() |
-        filter.Emoji() | filter.Gif() | filter.Numbers()
-        | filter.BanWord() | filter.Lock() | filter.AutoLock() | filter.MaxMsg()),
-               pass_chat_data=True,
-               pass_user_data=True)
+@messaage_warp(
+    filters=filter.Run() & Filters.group & (~filter.Admin()) & (~filter.VipUser()) & (~filter.GroupAdmin()) & (
+            filter.TelegramLink() | filter.Lang() | filter.Flood() |
+            filter.Emoji() | filter.Gif() | filter.Numbers()
+            | filter.BanWord() | filter.Lock() | filter.AutoLock() | filter.MaxMsg()),
+    pass_chat_data=True,
+    pass_user_data=True)
 @run_async
 def telegram_link_handler(bot, update, user_data, chat_data):
     """
@@ -33,7 +34,8 @@ def telegram_link_handler(bot, update, user_data, chat_data):
     warn_user(bot, update, user_data, chat_data)
 
 
-@messaage_warp(filters=(filter.Run() & Filters.group & Filters.all & ~filter.Admin() & ~filter.GroupAdmin()),
+@messaage_warp(filters=(filter.Run() & Filters.group & Filters.all & ~filter.VipUser() & ~filter.Admin()
+                        & ~filter.GroupAdmin()),
                pass_chat_data=True, pass_user_data=True)
 @run_async
 def common_message_handler(bot, update, user_data, chat_data):
@@ -67,12 +69,24 @@ def common_message_handler(bot, update, user_data, chat_data):
     return
 
 
+@messaage_warp(filters=filter.Extra())
+def extra_message_handle(bot, update):
+    """
+        :param bot:
+        :param update:
+        :type bot: Bot
+        :type update: Update
+        :return:
+        """
+    chat_data = get_chat_data()
+    ret = chat_data[ChatData.EXTRA][update.message.text]
+    bot.send_message(chat_id=update.message.chat_id, text=ret)
+
+
 @check_admin(admin=True)
 @check_run()
 @run_async
 def limit_set(bot, update, chat_data, groups):
-
-
     if not chat_data.get('ban_state'):
         chat_data['ban_state'] = {}
     if groups[0] in ["#", "/", "!"]:

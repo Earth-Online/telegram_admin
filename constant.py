@@ -147,6 +147,14 @@ NO_SUPPORT_FORMAT = "هذه الصغية غير مدعومة"
 USER_FORWARD_START = "ارسل الرسالة الان"
 USER_FORWARD_STOP = "تم ارسالة الرسالة للجميع"
 
+# /vipuser msg
+VIPUSER_MSG = "add {ids} ok"
+
+# /extra msg
+EXTRA_MSG = "Send Message Now :"
+EXTRA_EXIT_MSG = "Send Reply now:"
+EXTRA_SAVE_MSG = "Done Save"
+
 ADMIN = "المشرف"
 
 SET_OK_MSG = "تم التعيين"
@@ -174,7 +182,8 @@ class RunState:
     GRUOP_FORWARD = 889
     forwardgroups = 777
     forwardusers = 666
-
+    EXTRA_START = 433
+    EXTRA_EXIT = 434
 
 class BanMessageType:
     VIDEO = 'video'
@@ -261,6 +270,7 @@ class UserData:
     WARN = "warn"
     MSG_DATA = "msg_data"
     MAXMSG_DATA = "maxmsg"
+    TMP = "tmp"
 
 
 class ChatData:
@@ -276,6 +286,8 @@ class ChatData:
     AUTO_LOOK_START = "look_start"
     AUTO_LOOK_STOP = "look_stop"
     RUN = "run"
+    VIPUSER = "vipuser"
+    EXTRA = "extra"
 
 
 TELEGRAM_DOMAIN = ["t.me", "telegram.me"]
