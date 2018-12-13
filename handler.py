@@ -8,7 +8,7 @@ from command import (start, run, add_admin, clearwarns, get_id, admins, get_grou
                      globalban, unglobalban, globalban_list, maxwarns, settimeflood, setflood, settings,
                      banword, unbanword, banwords, save, lang, save_data, kick, lock, unlock, autolock,
                      cancel, lockstart, lockstop, setmaxmessage, timer, deletetimer,
-                     listtimer, unautolock, ping, help, sudo, vipuser)
+                     listtimer, unautolock, ping, help, sudo, vipuser, topuser)
 
 from telegram.ext import ConversationHandler, RegexHandler, MessageHandler
 from message import common_message_handler, telegram_link_handler, limit_set, new_member, extra_message_handle
@@ -50,7 +50,8 @@ command_handler = [
     ping,
     help,
     sudo,
-    vipuser
+    vipuser,
+    topuser
 ]
 
 message_handler = [

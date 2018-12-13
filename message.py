@@ -34,7 +34,7 @@ def telegram_link_handler(bot, update, user_data, chat_data):
     warn_user(bot, update, user_data, chat_data)
 
 
-@messaage_warp(filters=(filter.Run() & Filters.group & Filters.all & ~filter.VipUser() & ~filter.Admin()
+@messaage_warp(filters=(filter.Run() & Filters.group & filter.TopMsg() & Filters.all & ~filter.VipUser() & ~filter.Admin()
                         & ~filter.GroupAdmin()),
                pass_chat_data=True, pass_user_data=True)
 @run_async

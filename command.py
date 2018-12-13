@@ -27,7 +27,7 @@ from constant import START_MSG, ADD_ADMIN_OK_MSG, BOT_NO_ADMIN_MSG, BOT_IS_ADMIN
     CLEANWARN_MSG, NO_RUN_MSG, LINK_FORMAT, GLOBAN_BAN_MSG, UNGLOBAN_BAN_MSG, MAXWARN_MSG, TIMEfLOOD_MSG, FLOOD_MSG, \
     SETTING_MSG, BANWORD_MSG, UNBANWORD_MSG, LANG_MSG, KICK_MSG, LOCK_MSG, UNLOCK_MSG, TIMER_MSG, DELETE_TIMER_MSG, \
     LISTTIMER_MSG, UNAUTOLOCK_MSG, LANG_DICT, e_allow_setting, LIMIT_DICT, VIPUSER_MSG
-from module import DBSession
+from module import DBSession, Sentence
 from module.group import Group
 from module.user import User
 from tool import command_wrap, check_admin, word_re, get_user_data, get_chat_data, get_conv_data, kick_user, \
@@ -880,6 +880,24 @@ def vipuser(bot, update, args, chat_data):
     user_list.extend(vip_user_list)
     chat_data[ChatData.VIPUSER] = user_list
     bot.send_message(chat_id=update.message.chat_id, text=VIPUSER_MSG.format(ids=" ".join(vip_user_list)))
+
+
+@command_wrap(filters=(filter.GroupAdmin() | filter.Admin()))
+def topuser(bot, update):
+    """
+    :param bot:
+    :type bot: Bot
+    :param update:
+    :type update: Update
+    :return:
+    """
+    session = DBSession()
+    sentences = session.query(Sentence).order_by(Sentence.frequency).limit(5).all()
+    ret_text = ""
+    for sentence in sentences:
+        ret_text = ret_text + sentence.sentence + "\n"
+    session.close()
+    bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 
 def save_data(bot=None, job=None):

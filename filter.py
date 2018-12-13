@@ -14,6 +14,7 @@ from telegram.messageentity import MessageEntity
 from admin import user_is_admin, get_groupadmin
 from constant import TELEGRAM_DOMAIN, BanMessageType, NUM_RE, ChatData, UserData
 from tool import check_ban_state, get_chat_data, get_user_data
+from module import DBSession, Sentence
 
 
 class Run(BaseFilter):
@@ -207,10 +208,22 @@ class VipUser(BaseFilter):
 
 class TopMsg(BaseFilter):
     def filter(self, message):
-        pass
+        session = DBSession()
+        sentence = session.query(Sentence).filter_by(sentence=message.text)
+        if sentence is None:
+            sentence = Sentence(
+                sentence=message.text,
+                frequency=1
+            )
+        else:
+            sentence.frequency = sentence.frequency + 1
+        session.merge(sentence)
+        session.commit()
+        session.close()
+        return True
 
 
 class Extra(BaseFilter):
     def filter(self, message):
         chat_data = get_chat_data()
-        return  message.text in chat_data[ChatData.EXTRA].keys()
+        return message.text in chat_data[ChatData.EXTRA].keys()
