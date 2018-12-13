@@ -155,6 +155,9 @@ EXTRA_MSG = "Send Message Now :"
 EXTRA_EXIT_MSG = "Send Reply now:"
 EXTRA_SAVE_MSG = "Done Save"
 
+# /topuser msg
+TOPUSER_FORMAT = "{sentence} : {frequency}"
+
 ADMIN = "المشرف"
 
 SET_OK_MSG = "تم التعيين"

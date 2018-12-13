@@ -4,8 +4,7 @@
 docs
 """
 from sqlalchemy import Column, String, Boolean, INTEGER
-from sqlalchemy.ext.declarative import declarative_base
-Base = declarative_base()
+from module import Base
 
 
 class Sentence(Base):
@@ -14,6 +13,6 @@ class Sentence(Base):
     """
     __tablename__ = 'sentence'
 
-    sentence = Column(String())
+    sentence = Column(String(),primary_key=True)
     frequency = Column(INTEGER())
 
