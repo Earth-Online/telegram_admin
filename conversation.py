@@ -16,35 +16,35 @@ from telegram.ext.filters import Filters
 from telegram import Update, Bot, ParseMode
 
 
-@command_wrap()
+@command_wrap(name="رسالة_للمجموعات")
 @check_admin()
 def bcgroups(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
     return RunState.GRUOP_FORWARD
 
 
-@command_wrap()
+@command_wrap(name="رسائل_للاعضاء")
 @check_admin()
 def bcusers(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
     return RunState.USER_FORWARD
 
 
-@command_wrap()
+@command_wrap(name="توجيه_للاعضاء")
 @check_admin()
 def forwardusers(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
     return RunState.forwardusers
 
 
-@command_wrap()
+@command_wrap(name="توجيه_للمجموعات")
 @check_admin()
 def forwardgroups(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
     return RunState.forwardgroups
 
 
-@command_wrap()
+@command_wrap(name="الغاء")
 @check_admin()
 def cancel(bot, update):
     return ConversationHandler.END
@@ -109,29 +109,45 @@ def forward_group(bot, update):
 def send_admin_msg(users, bot, update):
     if Filters.text(update.message):
         for user in users:
-            bot.send_message(chat_id=user.id, text=update.message.text, parse_mode=ParseMode.HTML)
+            bot.send_message(
+                chat_id=user.id,
+                text=update.message.text,
+                parse_mode=ParseMode.HTML)
             sleep(1)
     elif Filters.sticker(update.message):
         for user in users:
-            bot.send_sticker(chat_id=user.id, sticker=update.message.sticker.file_id)
+            bot.send_sticker(
+                chat_id=user.id,
+                sticker=update.message.sticker.file_id)
             sleep(1)
     elif Filters.photo(update.message):
         for photo in update.message.photo:
             for user in users:
-                bot.send_photo(chat_id=user.id, photo=photo.file_id, caption=update.message.caption)
+                bot.send_photo(
+                    chat_id=user.id,
+                    photo=photo.file_id,
+                    caption=update.message.caption)
                 sleep(1)
     elif Filters.video(update.message):
         for user in users:
-            bot.send_video(chat_id=user.id, video=update.message.video.file_id, caption=update.message.caption)
+            bot.send_video(
+                chat_id=user.id,
+                video=update.message.video.file_id,
+                caption=update.message.caption)
             sleep(1)
     elif Filters.audio(update.message):
         for user in users:
-            bot.send_audio(chat_id=user.id, audio=update.message.audio.file_id, caption=update.message.caption)
+            bot.send_audio(
+                chat_id=user.id,
+                audio=update.message.audio.file_id,
+                caption=update.message.caption)
             sleep(SEND_SLEEP)
     elif Filters.document(update.message):
         for user in users:
-            bot.send_document(chat_id=user.id, document=update.message.document.file_id,
-                              caption=update.message.caption)
+            bot.send_document(
+                chat_id=user.id,
+                document=update.message.document.file_id,
+                caption=update.message.caption)
             sleep(1)
     else:
         return
