@@ -300,7 +300,7 @@ e_allow_setting = [BanMessageType.__dict__[key] for key in filter(lambda x: x[0]
 allow_setting = list(LIMIT_DICT.keys())
 
 allow_str = "|".join(allow_setting)
-SETTING_RE = re.compile(f"^[!|#|/]*({allow_str})\\s+({OpenState.OPEN}|{OpenState.CLODE})$")
+SETTING_RE = re.compile(f"^[!|#|/]*({OpenState.OPEN}|{OpenState.CLODE})\\s+({allow_str})$")
 NUM_RE = re.compile(r"\d")
 
 BANWORD_KEY = "banwordre"
