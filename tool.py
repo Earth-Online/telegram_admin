@@ -73,7 +73,6 @@ def check_admin(admin=True):
             :param update:
             :type update:Update
             """
-            import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
 
             user = update.message.from_user
             if user_is_admin(user.id) != admin:
