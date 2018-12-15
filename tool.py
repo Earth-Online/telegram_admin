@@ -34,7 +34,7 @@ def command_wrap(name: str = "", pass_chat_data=False, pass_user_data=False, pas
                 arg = kwargs['groups'][0].split(" ")
                 kwargs.pop('groups')
                 try:
-                    ret = func(args=arg *args, **kwargs)
+                    ret = func(args=arg, *args, **kwargs)
                     return ret
                 except Exception as e:
                     logging.error(e)
@@ -73,6 +73,8 @@ def check_admin(admin=True):
             :param update:
             :type update:Update
             """
+            import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
+
             user = update.message.from_user
             if user_is_admin(user.id) != admin:
                 bot.send_message(chat_id=update.message.chat_id, text="انت لست مطور")
