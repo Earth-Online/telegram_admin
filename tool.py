@@ -29,8 +29,8 @@ def command_wrap(name: str = "", pass_chat_data=False, pass_user_data=False, pas
 
     def decorator(func):
         def wrapper(*args, **kwargs):
+            ret = None
             if pass_args:
-                ret = None
                 arg = kwargs['groups'][0].split(" ")
                 kwargs.pop('groups')
                 try:
