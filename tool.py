@@ -45,7 +45,7 @@ def command_wrap(name: str = "", pass_chat_data=False, pass_user_data=False, pas
                     return ret
                 except Exception as e:
                     logging.error(e)
-        return RegexHandler(pattern=f"^{name or func.__name__}\s*(.*)", callback=wrapper, pass_chat_data=pass_chat_data,
+        return RegexHandler(pattern=f"^/*{name or func.__name__}\s*(.*)", callback=wrapper, pass_chat_data=pass_chat_data,
                             pass_user_data=pass_user_data,pass_groups=True, **kwargs)
 
     return decorator
