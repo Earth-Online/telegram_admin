@@ -10,7 +10,7 @@ from time import time
 
 from telegram import Update, Bot
 from functools import wraps
-from telegram.ext import CommandHandler, MessageHandler, ConversationHandler, RegexHandler
+from telegram.ext import MessageHandler, ConversationHandler, RegexHandler
 from telegram.ext.dispatcher import DEFAULT_GROUP
 from telegram.utils.promise import Promise
 
@@ -68,7 +68,7 @@ def check_admin(admin=True):
             """
             user = update.message.from_user
             if user_is_admin(user.id) != admin:
-                bot.send_message(chat_id=update.message.chat_id, text="انت لست مشرف")
+                bot.send_message(chat_id=update.message.chat_id, text="انت لست مطور")
                 return
             return func(bot, update, *args, **kwargs)
 

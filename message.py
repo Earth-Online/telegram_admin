@@ -91,7 +91,9 @@ def limit_set(bot, update, chat_data, groups):
         chat_data['ban_state'] = {}
     if groups[0] in ["#", "/", "!"]:
         groups[0] = groups[0][1:]
-    groups[0], groups[1] = groups[1], groups[0]
+    tmp = [None, None]
+    tmp[0], tmp[1] = groups[1], groups[0]
+    groups = tmp
     if LIMIT_DICT.get(groups[0]):
         limits = LIMIT_DICT.get(groups[0])
         for limit in limits:
