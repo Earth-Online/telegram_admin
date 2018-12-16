@@ -16,28 +16,28 @@ from telegram.ext.filters import Filters
 from telegram import Update, Bot, ParseMode
 
 
-@command_wrap(name="رسالة_للمجموعات")
+@command_wrap(name="رسالة للمجموعات")
 @check_admin()
 def bcgroups(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
     return RunState.GRUOP_FORWARD
 
 
-@command_wrap(name="رسائل_للاعضاء")
+@command_wrap(name="رسالة للاعضاء")
 @check_admin()
 def bcusers(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
     return RunState.USER_FORWARD
 
 
-@command_wrap(name="توجيه_للاعضاء")
+@command_wrap(name="توجيه للاعضاء")
 @check_admin()
 def forwardusers(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
     return RunState.forwardusers
 
 
-@command_wrap(name="توجيه_للمجموعات")
+@command_wrap(name="توجيه للمجموعات")
 @check_admin()
 def forwardgroups(bot, update):
     update.message.reply_text(text=USER_FORWARD_START)
