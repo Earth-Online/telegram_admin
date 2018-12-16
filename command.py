@@ -86,6 +86,7 @@ def add_admin(bot, update, args):
     :param args:
     :return:
     """
+
     if not len(args):
         bot.send_message(chat_id=update.message.chat_id, text=ARG_ERROR_MSG)
         return
@@ -654,7 +655,7 @@ def kick(bot, update, args):
     bot.send_message(chat_id=update.message.chat_id, text=KICK_MSG.format(ids=" ".join(kick_user_list)))
 
 
-@command_wrap(pass_args=True, pass_chat_data=True, name="قفل")
+@command_wrap(pass_args=True, pass_chat_data=True, name="وضع الصامت")
 @check_admin()
 @check_run()
 @run_async
@@ -675,7 +676,7 @@ def lock(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=LOCK_MSG)
 
 
-@command_wrap(pass_chat_data=True, name="فتح")
+@command_wrap(pass_chat_data=True, name="وضع العام")
 @check_admin()
 @check_run()
 @run_async

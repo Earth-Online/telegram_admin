@@ -68,7 +68,7 @@ def main():
     update_ban_list()
     loaddata(updater.job_queue)
     logging.info('run bot')
-    updater.start_polling()
+    updater.start_polling(clean=True)
     updater.idle()
     save_data(job=updater.job_queue)
 
