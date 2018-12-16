@@ -135,7 +135,7 @@ def run(bot, update, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=BOT_IS_ADMIN_MSG)
 
 
-@command_wrap(pass_args=True, name="ازالة_التحذيرات")
+@command_wrap(pass_args=True, name="ازالة التحذيرات")
 @check_admin()
 @check_run()
 @run_async
@@ -289,7 +289,7 @@ def info(bot, update):
                      text=INFO_MSG.format(username=send_user.username, user_id=send_user.id))
 
 
-@command_wrap(pass_args=True, name="حظر_عام")
+@command_wrap(pass_args=True, name="حظر عام")
 @check_admin()
 @run_async
 def globalban(bot, update, args):
@@ -316,7 +316,7 @@ def globalban(bot, update, args):
     update_ban_list()
 
 
-@command_wrap(pass_args=True, name="الغاء_العام")
+@command_wrap(pass_args=True, name="الغاء العام")
 @check_admin()
 @run_async
 def unglobalban(bot, update, args):
@@ -343,7 +343,7 @@ def unglobalban(bot, update, args):
     update_ban_list()
 
 
-@command_wrap(name="المحظورين_عام")
+@command_wrap(name="المحظورين عام")
 @check_admin()
 @run_async
 def globalban_list(bot, update):
@@ -393,7 +393,7 @@ def maxwarns(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=MAXWARN_MSG.format(num=args[0]))
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, name="وقت_التكرار")
+@command_wrap(pass_chat_data=True, pass_args=True, name="وقت التكرار")
 @check_admin()
 @check_run()
 @run_async
@@ -418,7 +418,7 @@ def settimeflood(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=TIMEfLOOD_MSG.format(num=args[0]))
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, name="تعيين_التكرار")
+@command_wrap(pass_chat_data=True, pass_args=True, name="تعيين التكرار")
 @check_admin()
 @check_run()
 @run_async
@@ -442,7 +442,7 @@ def setflood(bot, update, args, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=FLOOD_MSG.format(num=args[0]))
 
 
-@command_wrap(pass_chat_data=True, pass_args=True, name="تعيين_الرسائل")
+@command_wrap(pass_chat_data=True, pass_args=True, name="تعيين الرسائل")
 @check_run()
 @run_async
 @check_admin_or_group_admin()
@@ -550,7 +550,7 @@ def unbanword(bot, update, args, chat_data):
     chat_data[ChatData.BANWORD_RE] = word_re(group_banwords)
 
 
-@command_wrap(pass_chat_data=True, name="منع")
+@command_wrap(pass_chat_data=True, name="الكلمات المحظورة")
 @check_admin()
 @check_run()
 @run_async
@@ -693,7 +693,7 @@ def unlock(bot, update, chat_data):
     bot.send_message(chat_id=update.message.chat_id, text=UNLOCK_MSG)
 
 
-@command_wrap(name="قفل_مؤقت")
+@command_wrap(name="قفل مؤقت")
 @check_admin()
 @check_run()
 def autolock(bot, update):
@@ -762,7 +762,7 @@ def listtimer(bot, update, job_queue):
     bot.send_message(chat_id=update.message.chat_id, text=ret_text)
 
 
-@command_wrap(pass_job_queue=True, pass_args=True, name="حذف_توقيت")
+@command_wrap(pass_job_queue=True, pass_args=True, name="حذف توقيت")
 @check_admin()
 @check_run()
 @run_async
@@ -778,7 +778,7 @@ def deletetimer(bot, update, job_queue, args):
     bot.send_message(chat_id=update.message.chat_id, text=DELETE_TIMER_MSG)
 
 
-@command_wrap(pass_chat_data=True, name="الغاء_القفل")
+@command_wrap(pass_chat_data=True, name="الغاء القفل")
 @check_admin()
 @check_run()
 @run_async
